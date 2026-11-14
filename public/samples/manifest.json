@@ -1,0 +1,162 @@
+{
+  "items": [
+    {
+      "id": "sample-01",
+      "name": "深海观测站",
+      "image": "01.jpg",
+      "positive": "horizontal 16:9 experimental game poster, Hatsune Miku as the only character, preserve her recognizable turquoise twin tails and iconic futuristic stage outfit, refined anime illustration, subject positioned slightly right of center, calm three-quarter pose, one hand gently touching a suspended glass sphere, face and hands clearly visible\n\nunderwater signal archive, abandoned deep-sea observatory, a luminous sonar ring behind the character, translucent sound waves flowing from the glass sphere and transforming into ribbons of light, a small school of silver fish drifting through the distant water, subtle bubbles and suspended particles, quiet mysterious atmosphere\n\nstrong asymmetrical composition, open dark negative space across the left third, compact archival graphic panels along the upper edge and right margin, small studies of sonar contours, fish silhouettes, and waveform diagrams, thin technical rules, modular grid, precise visual hierarchy, clear focal point, carefully balanced detail\n\nlimited palette of midnight navy, deep cobalt, icy cyan, soft ivory, restrained copper-orange accents, luminous cyan edge light, gentle volumetric rays from above, rich dark-to-light contrast, translucent glass refraction, fine ink contours\n\ncyanotype and screen-print texture, aged archival paper grain, subtle halftone, slight ink registration shift, clean geometric color blocks, delicate scratched marks, premium editorial art direction, polished and atmospheric\n\nlarge readable English title “TIDAL SIGNAL” in the upper-left negative space, small English subtitle “FIELD RECORD 04”, all visible lettering in English only, use no other readable words, no Chinese or Japanese characters, no logos, no watermark, no signature\n\nkeep the face, hands, and main silhouette unobstructed, keep the negative space clean, avoid extra characters, crowded layout, excessive glow, blurry details, malformed hands, illegible text",
+      "negative": "3d, 3d render, cgi, octane render, unreal engine, blender, photorealistic, realistic skin, subsurface scattering, soft airbrushed shading, smooth gradient shading, glossy plastic, specular highlight on skin, ambient occlusion, depth of field, bokeh, blur, blurry, low contrast, muddy colours, watermark, signature, text, letters, numbers, logo, deformed hands, extra fingers, extra limbs",
+      "source": "ComfyUI",
+      "meta": {
+        "model": "krea2_turbo_fp8.safetensors",
+        "loras": [
+          "wlop_c1-st4000",
+          "si_(wooupp)_000001000",
+          "light_c1-st2000",
+          "Krea2Rella_c1-st8000",
+          "KREA_MIDJ_1",
+          "z3zz4-k2-4_c1-st5000"
+        ],
+        "seed": "65751399720239",
+        "steps": 12,
+        "cfg": 1.0,
+        "sampler": "er_sde",
+        "scheduler": "simple",
+        "width": 1920,
+        "height": 1088
+      },
+      "warning": ""
+    },
+    {
+      "id": "sample-02",
+      "name": "巨构与人影",
+      "image": "02.jpg",
+      "positive": "The character should be represented as a tiny human silhouette positioned at the bottom center of the image, occupying less than five percent of the canvas to establish an overwhelming sense of scale. The rest of the canvas is dominated by the colossal structure rising into the hazy sky. Leave clean, atmospheric negative space in the upper third and sides for bold graphic design elements and heavy industrial typography.\n\nA modern graphic poster design with a strong visual hierarchy and a brutalist architectural aesthetic. Main color palette: industrial concrete gray, matte charcoal black, and stark off-white. Secondary colors: hazard warning orange, high-visibility safety yellow, and glowing white signal lights. Use sharp contrast, clean pure color planes, an elegant technical layout, stencil typography, geometric warning blocks, and layered architectural schematic masks.\n\nBehind and above the tiny silhouette is a colossal, towering megastructure of infinite scale, composed of massive concrete slabs, interlocking heavy metal girders, and endless structural pillars stretching into a misty, atmospheric background. The architecture features giant circular hollows, deep rectangular cutouts, and massive vertical shafts. Intricate networks of cables, industrial pipes, and metal scaffolding hang from the structures, creating complex linear patterns that break the solid shapes.\n\nUse an inverse-color mask / technical overlay effect where parts of the megastructure transition into flat 2D blueprint lines or solid color blocks. The mask should look like an engineering schematic: dark concrete areas turn into bright warning orange or pure white vectors, and some structural sections are hidden behind bold diagonal hazard stripes and hollow stenciled frames.\n\nAdd heavy industrial typography as design elements. Use large outlined text, technical serial numbers, and stenciled letters placed directly on the structure surfaces and in the sky. Include the following clear, readable exact text:\n\"MEGASTRUCTURE\"\n\"SECTOR-09\"\n\"WARNING\"\n\nInclude small decorative technical details, such as altitude coordinates, structural load data, and hazard warning icons in English and German, arranged like a premium architectural concept poster. The main title should be presented in a bold, blocky, stencil-inspired typeface; smaller technical text should serve as layout accents. Clearly incorporate a stylized construction conglomerate logo as a graphic identity element, integrated into the upper left or lower right corner.\n\nComposition details: Tiny silhouette at the bottom, massive brutalist concrete structure dominating the center and top, atmospheric haze in the background, hazard orange and charcoal black color scheme, stencil lettering overlay, clean layout lines, pure modern poster design, high-end sci-fi key visual, industrial aesthetic, bright yellow indicator lights, heavy machinery energy.",
+      "negative": "",
+      "source": "ComfyUI",
+      "meta": {
+        "model": "redcraft22INT8INT4_2Krea2Edition.safetensors",
+        "loras": [
+          "Detailer-KREA2",
+          "Krea2Rella_c1-st8000",
+          "z3zz4-k2-4_c1-st5000",
+          "ysm-krea2_c1-st2000",
+          "Krea2_MangaTint_ArrayRuins",
+          "onineko_k2_v1",
+          "KREA2_fjsmu",
+          "silverpalacestyle_krea2-step00006500",
+          "NXMZ_krea2_style_v1.0_c1-st4000"
+        ],
+        "seed": "23019194861979",
+        "steps": 10,
+        "cfg": 1.0,
+        "sampler": "er_sde",
+        "scheduler": "simple",
+        "width": 1080,
+        "height": 1920
+      },
+      "warning": ""
+    },
+    {
+      "id": "sample-03",
+      "name": "明日香海报",
+      "image": "03.jpg",
+      "positive": "Use the uploaded image as the only source image. Preserve the original characters and composition: Asuka standing on the ledge on the right side in her red plugsuit with long flowing orange hair, the giant silhouette of Evangelion Unit-01 with its glowing eye in the center-left, the city skyline below, and the twilight sky.\nExpand the canvas into a vertical 9:16 poster composition. Keep Asuka on the right edge, leaving the upper left sky as negative space for typography.\nCreate a modern graphic key visual poster. Main color palette: sunset magenta, twilight indigo, neon green accents, and bright red. Use flat color shapes and clean layout grids.\nOverlay clean geometric lines and semi-transparent diagonal color blocks across the sky.\nAdd bold hollow typography and design text in the upper left negative space. Include exact readable text:\n“EVANGELION”\n“ASUKA”\n“UNIT-01”\nAdd small layout details like warning symbols, text coordinates, and minimalist logo marks in neon green and white.\nComposition details: Asuka on the right, Unit-01 silhouette in the background, twilight gradient sky with flock of birds, geometric overlays, hollow text on the upper left, high-end game promotional poster design.",
+      "negative": "",
+      "source": "ComfyUI",
+      "meta": {
+        "model": "krea2_turbo_fp8.safetensors",
+        "loras": [
+          "Detailer-KREA2.safetensors",
+          "z3zz4-k2-4_c1-st5000.safetensors"
+        ],
+        "seed": "607399599911842",
+        "steps": 10,
+        "cfg": 1.0,
+        "sampler": "er_sde",
+        "scheduler": "simple",
+        "width": 1080,
+        "height": 1920
+      },
+      "warning": ""
+    },
+    {
+      "id": "sample-04",
+      "name": "凋零的百合",
+      "image": "04.jpg",
+      "positive": "The main visual subject is an elegant and melancholic graphic composition positioned on the right side of the poster, occupying the right two-thirds of the canvas. The focal point features a detailed, decaying white lily flower merging with a slender, pale, semi-translucent silhouette of a female hand reaching upward. The petals of the lily are actively dissolving and shattering into tiny organic fragments, floating petals, and abstract geometric dust particles that scatter from right to left. Leave a large, clean, minimalist negative space in the upper-left and lower-left areas in muted mist blue and soft ivory white, completely free of any text, letters, characters, or typography.\n\nA modern premium art poster design with a strong poetic visual hierarchy. Main color palette: dusty rose, dry sepia brown, and charcoal black. Secondary colors: pale mist blue, soft silver, and clean white. Use high contrast, clean flat color gradients, an elegant graphic layout, and emotional texture overlays. The design relies entirely on visual shapes and compositions without any written words.\n\nThe flower and hand are rendered with delicate outlines and soft, grainy shading, giving them a vintage lithograph or high-end artistic print aesthetic. The dispersing petals transition from solid organic shapes into abstract geometric lines, tiny specks of dust, and glittering particles, suggesting a quiet dissolution into the atmosphere. A series of thin, gold-foiled concentric circles and vertical abstract lines are subtly overlaid behind the flower, symbolizing acoustic resonance and passing time.\n\nUse an inverse-color mask / negative-color mask effect where the scattering petals cross the geometric elements. Where the dark brown stems overlap the gold lines, they turn into negative white space; where the white petals pass over the light background, they are defined by extremely thin, sharp charcoal-grey borders.\n\nThe composition utilizes pure visual storytelling. The left side is a clean, tranquil field of mist-blue gradient, balanced only by the drifting particles from the shattering flower and faint, elegant golden vectors. No text of any language is present. The focus is entirely on the contrast between the detailed, fragile form of the decaying lily and the vast, quiet negative space.\n\nComposition details: Dissolving white lily and hand silhouette on the right, petals turning into abstract dust drifting left, large mist blue negative space on the left, concentric time rings and fine lines in the background, absolutely no typography, pure modern poster design, high-end poetic key visual, melancholic and nostalgic atmosphere, dry rose and silver accents, textured paper overlay.",
+      "negative": "",
+      "source": "ComfyUI",
+      "meta": {
+        "model": "redcraft22INT8INT4_2Krea2Edition.safetensors",
+        "loras": [
+          "Detailer-KREA2",
+          "Krea2Rella_c1-st8000",
+          "z3zz4-k2-4_c1-st5000",
+          "ysm-krea2_c1-st2000",
+          "Krea2_MangaTint_ArrayRuins",
+          "onineko_k2_v1",
+          "KREA2_fjsmu",
+          "silverpalacestyle_krea2-step00006500",
+          "NXMZ_krea2_style_v1.0_c1-st4000"
+        ],
+        "seed": "990062695938477",
+        "steps": 10,
+        "cfg": 1.0,
+        "sampler": "er_sde",
+        "scheduler": "simple",
+        "width": 1080,
+        "height": 1920
+      },
+      "warning": ""
+    },
+    {
+      "id": "sample-05",
+      "name": "砖墙拼贴",
+      "image": "05.jpg",
+      "positive": "一张概念性游戏海报, 角色使用初音未来, 并以所附参考图中的音乐专辑拼贴感、白色砖墙网格、重复半透明肖像叠印、粗糙红色手写字体、情绪碎片化与反叛艺术摇滚氛围作为主要视觉依据.初音未来是画面中唯一具有明确身份的虚构角色, 保留她的经典角色识别度, 不要加入无关身体特征, 不要将她改造成其他人物, 也不要引入真实音乐人或真人照片.整体海报围绕名望、记忆、封闭、舞台身份以及表演者和观众之间的墙展开.,\n\n让整张画布被浅白色与冷灰色砖墙覆盖.砖墙由不规则横向砖层组成, 每块砖之间使用细窄的深蓝灰色砂浆线分隔.砖块纹理必须延伸到整张画面, 包括人物肖像前方, 使墙体成为半透明的阻隔层, 而不是普通背景.略微改变砖块宽度, 加入手绘般不均匀的边缘、浅淡污渍、掉漆区域、细小裂缝、脏旧角落、轻微阴影以及白色涂层变薄后的半透明效果.保留砖墙明显的横向节奏, 同时让少数砖块轻微错位, 制造压迫与不稳定感.,\n\n在画面中央偏左的背景中放置一幅大型初音未来正面半透明肖像, 占据约一半画面高度.该肖像应当褪色、幽灵般、被砖墙部分隐藏, 脸部与上半身透过低透明度白色叠层显现.在画面右侧放置第二幅更大的初音未来肖像, 占据右侧三分之一区域, 使其更加清晰、深暗, 并带有疏离感.让右侧肖像通过透明交叠与中央肖像发生融合, 如同多张照片或不同记忆画面被重复印刷在一起.在下方中央或左下方加入第三幅被裁切的初音未来肖像, 头部略微向下倾斜, 表现更加私密、脆弱的情绪.所有重复肖像都必须明确属于初音未来, 但在尺寸、透明度、角度和情绪温度上形成区别.,\n\n让人物肖像与砖墙真正融合, 而不是作为干净的抠图图层放置.允许多条砖缝横向穿过人物的脸部、脖颈、肩膀、双手与服装, 形成半透明的视觉中断.砖墙线条应当覆盖人物, 但不能完全破坏面部识别.使用不同的透明度：中央肖像可以非常浅, 接近被白色洗掉；右侧肖像可以拥有更强的深蓝灰对比；下方肖像则逐渐溶解为白色、黑色与低饱和蓝色的摄影碎片.加入轻微双重曝光、错位脸部轮廓、重叠眼睛位置、重复肩部剪影和透明建筑块, 制造角色仿佛被困在多重心理屏障与视觉墙体之后的感觉.,\n\n使用受限制的色彩方案, 包括暖白色、冷象牙白、浅灰色、灰尘蓝、深海军蓝、炭黑、低饱和米色与强烈暗绯红.砖墙整体保持白色与冷灰色.使用深蓝和炭黑表现最强的人物阴影、砖缝轮廓、深色背景碎片和下方图像模块.暗红色仅用于主手写标题、小型颜料笔触、破损下划线、箭头和局部红色反光.红色应当像湿润刷子或粗马克笔直接涂在墙面上, 具有不均匀透明度、拖拽痕迹、偶然飞溅和轻微渗入纸面的边缘.避免使用霓虹色, 也不要采用光滑商业化调色.,\n\n在画面上方中央与中央偏左区域放置大型红色手写标题, 使用准确可读的文字“PINK FLOYD”.在其下方继续放置第二行红色手写标题“THE WALL”.字体应当粗粝、手工、细长、充满不稳定感, 笔画粗细不断变化, 边缘破碎, 带有颜料滴落、与砖缝交叠的痕迹, 以及少量超出基线的拉长笔画.标题必须清晰可辨, 但有意保持不完美.围绕标题加入细红色箭头、斜向划痕、下划线与未完成的记号, 仿佛有人直接在墙上写下这些文字.红色标题应成为主要平面设计元素, 但不能完全覆盖初音未来的核心脸部.,\n\n将“墙体专辑”概念转化为虚构的初音未来音乐海报, 不要复制任何现实专辑封面、真人演出照片或商业品牌.于左下方或中央下方加入准确可读的文字“初音未来”, 并搭配窄体英文文字“HATSUNE MIKU”.加入少量辅助短句, 例如“THE VOICE BEHIND THE WALL”“LIVE MEMORY / SIGNAL ARCHIVE”“SIDE A — SIDE B”和“NO EXIT FROM THE ECHO”.这些文字应融入砖墙结构, 部分内容可以被砂浆线打断.排版保持稀疏、手工和拼贴感, 不要变成整洁的数字界面.,\n\n建立明确的多层叠印关系.最前景是覆盖整幅画面的砖墙网格；浅淡的中央肖像位于墙后；深色右侧肖像存在于两层砖石结构之间；下方若干摄影碎片则部分隐藏在黑色或深蓝色矩形块后面.在右下方加入一块宽大的深色半透明矩形, 内部包含被裁切的肖像细节、微小档案笔记和几乎不可见的时间戳式标记.在左下方肖像周围加入浅白色撕裂矩形与不规则负空间块, 使其像撕下的照片、被审查的记忆、联络表碎片或损坏的印刷层.,\n\n加入受到拼贴艺术与抗议海报启发的视觉干扰：细横向扫描线、错位砖层、透明灰色矩形、撕纸边缘、反向摄影碎片、孤立眼睛形状、被裁切的手部、斜向构造标记、红色颜料刮痕、褪色编号以及围绕局部面部细节绘制的手写圆圈.部分元素可以跨过人物外侧肩膀或服装, 但眼睛、嘴部与主要脸部结构必须保持可读.在指定区域使用逆向色彩蒙版, 将浅色肖像转化为深海军蓝剪影, 也将深色服装区域转化为褪色象牙白镂空.所有蒙版都应具有模拟印刷、手工拼贴和不规则边缘感, 避免过于工整的几何效果.,\n\n使用带有轻微冷色调的柔和正面日光, 仿佛有人正在拍摄一张贴在墙上的实体拼贴作品.加入砖缝之间的柔和阴影、涂漆表面的浅反光、纸张颗粒、油墨吸收、干刷纹理、复印机噪点和低透明度摄影褪色.墙面与人物照片应当处于同一个真实物质空间中, 具有可触摸的纸张与印刷质感.避免电影式奇幻光效、魔法特效、过量粒子、干净的三维渲染、精致时尚摄影和光滑数字专辑界面.,\n\n最终构图应传达一种被封闭的表演者、一种困在记忆层中的声音, 以及被墙体、照片和手写宣言不断重构的公众形象.实验音乐海报, 艺术摇滚拼贴, 白色砖墙阻隔, 半透明角色肖像, 红色抗议式手写字体, 心理视觉碎片, 档案印刷纹理, 磨损混合媒介, 层叠负空间, 粗粝手绘排版, 现代游戏宣传主视觉, 克制却带有反叛力量的情绪氛围, 在显现与消失之间建立强烈张力.,",
+      "negative": "",
+      "source": "ComfyUI",
+      "meta": {
+        "model": "redcraft22INT8INT4_2Krea2Edition.safetensors",
+        "loras": [
+          "z3zz4-k2-4_c1-st5000",
+          "ba_style_krea2_v1",
+          "Yoneyama_Mai_Krea2"
+        ],
+        "seed": "300321018076284",
+        "steps": 10,
+        "cfg": 1.0,
+        "sampler": "er_sde",
+        "scheduler": "simple",
+        "width": 1920,
+        "height": 1080
+      },
+      "warning": ""
+    },
+    {
+      "id": "sample-06",
+      "name": "勃艮第典礼",
+      "image": "06.jpg",
+      "positive": "Create a vertical 2:3 premium game character poster featuring 初音未来, using the attached reference image as the primary guide for its elegant split composition, dark burgundy geometric field, warm ivory negative space, ornate engraved border system, ceremonial vertical sword, central triangular ornamental frame, and restrained romantic fantasy atmosphere. Preserve the recognizable canonical identity and established visual presence of 初音未来 without inventing unrelated physical traits, additional characters, or arbitrary costume changes. Position 初音未来 on the right side of the composition, occupying the right-center and lower-right area, while keeping her body integrated into the pale ivory section rather than placing her in the middle of the canvas. Show her in a graceful upright pose with a calm, dignified posture, slightly turned toward the left, as if standing beside a ceremonial sword and a symbolic flower. Keep her face, eyes, hands, and primary silhouette clearly readable, using a simplified refined character rendering that harmonizes with the engraved poster style.\n\nDivide the canvas through a powerful diagonal boundary. The left half should be dominated by a deep burgundy-red geometric panel that begins at the upper-left corner, expands across the left two-fifths of the image, and cuts diagonally toward the lower-middle area. The right half should remain warm ivory, pale cream, and very light gray, creating generous negative space around 初音未来 and the sword. The diagonal boundary should be sharp but slightly softened by subtle paper texture and fine ornamental linework. Do not use any readable typography, letters, numbers, logo, watermark, emblem inscription, signature, or symbolic writing anywhere in the poster. The entire design must communicate through shape, color, ornament, material, silhouette, and object placement only.\n\nConstruct the burgundy panel as a dense luxury engraved pattern. Fill it with layered geometric motifs inspired by interlocking hexagons, angular latticework, stylized petals, symmetrical ribbons, stepped diamonds, narrow chevrons, and repeating architectural borders. Use darker burgundy linework over the red field, together with pale ivory engraved outlines and subtle tone-on-tone hatch marks. The pattern should feel hand-printed, embossed, and finely etched, with slight irregularity in line thickness, delicate paper grain, and soft ink pressure variations. Keep the left panel visually rich but organized, forming a strong flat color plane behind the main ornamental frame.\n\nPlace a large symmetrical triangular and diamond-shaped ornamental frame inside the burgundy panel, extending from the upper-left-middle area toward the lower-left-middle area. The frame should resemble a ceremonial heraldic plaque or an engraved relic cover. Build it from multiple concentric borders, pointed corners, interlaced floral patterns, mirrored scrollwork, narrow filigree bands, stylized wing motifs, and small geometric cutouts. Use pale ivory and muted silver linework against the burgundy surface. The central interior of the frame should remain mostly dark burgundy with subtle geometric texture, leaving a controlled visual void rather than filling it with text. Create a second partial ornamental frame on the right side, cut off by the canvas edge and partially hidden behind the sword, so the composition feels layered and architecturally balanced.\n\nPlace a tall ceremonial sword vertically near the center-right, extending from the lower-right foreground almost to the upper edge of the canvas. The sword must be a major graphic axis, clearly separated from 初音未来’s face and body. Design the blade as long, narrow, symmetrical, and pale silver-white, with a dark central groove, restrained metallic shading, and sharp but elegant edges. The crossguard should be horizontal, dark burgundy and antique silver, decorated with small symmetrical carved motifs. The pommel should be circular or oval, containing abstract ornamental geometry without any letters, numbers, recognizable religious symbols, or readable marks. The sword should appear embedded in the poster composition like a sacred vertical divider between the burgundy geometric field and the ivory negative space.\n\nIntegrate 初音未来 with the sword without making her hold it aggressively. Her silhouette may overlap the lower-right edge of the sword’s blade or stand slightly behind it, but keep the blade visually distinct. Use a restrained character treatment combining clean anime contour lines with engraved illustration techniques. Convert selected outer portions of her hair, sleeves, and lower clothing into fine burgundy or graphite linework, allowing them to merge subtly with the geometric background. Keep the face and hands lighter and clearer, with controlled pale shading and delicate cool-gray contour accents. A few burgundy ornamental fragments may echo around her lower silhouette, but do not cover the face or turn her body into an abstract shape.\n\nAt the bottom-right, place a single elegant flower with a slender stem and several delicate leaves, positioned diagonally beneath the sword. The flower should be deep burgundy-red with layered petals, slight ink texture, and carefully defined organic edges. Keep the leaves mostly monochrome graphite, ivory, and muted olive-gray, with fine botanical linework and pale translucent shading. The flower should visually counterbalance the vertical sword, creating a narrative relationship between weapon and fragility, duty and beauty, ceremony and emotion. Do not add bouquets, multiple flowers, decorative text, or additional objects.\n\nUse a limited palette of deep burgundy, wine red, dark plum-red, warm ivory, pale cream, silver-gray, charcoal, and tiny muted rose accents. Make burgundy the dominant color of the left geometric plane, selected sword details, ornamental linework, and the flower. Make ivory the dominant color of the right negative-space field, sword blade, character highlights, and engraved borders. Use charcoal and cool gray only for thin contour lines, botanical details, subtle shadows, and architectural depth. Avoid bright green, orange, neon colors, strong purple, and broad rainbow effects. Apply the color as flat graphic planes, translucent paper layers, fine engraving, dry ink, subtle screen-print texture, and restrained metallic highlights rather than glossy digital gradients.\n\nAdd layered masks and cutout structures across the composition. Use diagonal ivory masks over parts of the burgundy panel, burgundy masks crossing small sections of the ivory area, thin angular windows, transparent geometric overlays, triangular openings, narrow vertical strips, and offset ornamental borders. Let some masks partially hide the lower body and outer clothing of 初音未来 while keeping her face, eyes, hands, and main pose unobstructed. Allow the sword to pass through several transparent frame layers, creating a clear foreground, middle-ground, and background hierarchy. Use small paper-cut shadow offsets and engraved inverse-color areas to make the flat poster feel physically assembled.\n\nCreate a sophisticated border around the entire canvas, based on the reference image’s fine architectural frame. Use repeated geometric rails, symmetrical corner decorations, floral line motifs, thin nested rectangles, and subtle burgundy-and-ivory registration layers. The border may be heavier on the left and lighter on the right, reinforcing the asymmetric split layout. Add a few empty circular seals and abstract ornamental medallions without any internal writing or recognizable symbols. All visual elements must remain purely graphic and nonverbal.\n\nUse soft diffuse illumination from the upper-right, creating pale highlights on 初音未来, the sword blade, and the ivory paper. Add a gentle burgundy reflected glow near the left edge of her silhouette and the flower petals. Apply subtle shadows beneath the sword and flower, faint paper fibers, lightly distressed ink, fine engraved hatching, delicate embossing, imperfect print registration, and a quiet archival book-cover texture. Keep the atmosphere still, noble, elegant, mysterious, and ceremonial.\n\nThe final composition should feel like a wordless royal fantasy artifact: a crimson geometric heraldic field on the left, an ivory ceremonial void on the right, 初音未来 standing beside a sacred vertical sword, and one deep-red flower completing the visual balance. Pure visual design only, no text, no typography, no letters, no numbers, no logos, no watermark, no signature, no readable symbols, ornate engraved poster, restrained romantic fantasy, premium game promotional key visual, elegant negative space, geometric heraldry, ceremonial sword composition, botanical counterpoint, refined printmaking atmosphere, and sophisticated modern editorial layout.",
+      "negative": "",
+      "source": "ComfyUI",
+      "meta": {
+        "model": "redcraft22INT8INT4_2Krea2Edition.safetensors",
+        "loras": [
+          "z3zz4-k2-4_c1-st5000",
+          "ba_style_krea2_v1",
+          "Yoneyama_Mai_Krea2"
+        ],
+        "seed": "563442450408038",
+        "steps": 10,
+        "cfg": 1.0,
+        "sampler": "er_sde",
+        "scheduler": "simple",
+        "width": 1920,
+        "height": 1080
+      },
+      "warning": ""
+    }
+  ]
+}

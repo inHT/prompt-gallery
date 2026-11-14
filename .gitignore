@@ -1,0 +1,4 @@
+data/
+__pycache__/
+*.pyc
+百度翻译api.txt
