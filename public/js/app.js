@@ -5,6 +5,11 @@ const state = {
   activeId: null,
   health: null,
   editingPositive: false,
+  editingTranslation: false,
+  mode: "both",
+  zoom: 1,
+  panX: 0,
+  panY: 0,
   saveTimer: 0,
 };
 
@@ -22,14 +27,6 @@ function esc(value) {
 
 function safeSrc(url) {
   return /^\/(samples|media)\/[A-Za-z0-9._-]+$/.test(url || "") ? url : "";
-}
-
-function pretty(text) {
-  const value = (text || "").trim();
-  const newlines = (value.match(/\n/g) || []).length;
-  if (newlines >= 2) return value;
-  if ((value.match(/,\s/g) || []).length >= 4) return value.replace(/,\s+/g, ",\n");
-  return value;
 }
 
 function excerpt(text) {
@@ -151,62 +148,142 @@ function fillReader() {
   const warning = $("reader-warning");
   warning.hidden = !item.warning;
   warning.textContent = item.warning || "";
-  $("positive-view").textContent = pretty(item.positive) || "（空）";
+  $("positive-view").textContent = item.positive || "（空）";
   if (!state.editingPositive) setIfIdle($("positive-edit"), item.positive || "");
-  const negativeBlock = $("negative-block");
   const showNegative = Boolean((item.negative || "").trim() || (item.negativeTranslation || "").trim());
-  negativeBlock.hidden = !showNegative;
-  if (showNegative) {
-    $("negative-view").textContent = pretty(item.negative) || "（空）";
-    setIfIdle($("negative-translation"), item.negativeTranslation || "");
-  }
-  setIfIdle($("translation"), item.translation || "");
+  $("negative-block").hidden = !(item.negative || "").trim();
+  $("negative-zh-block").hidden = !showNegative;
+  if ((item.negative || "").trim()) $("negative-view").textContent = item.negative;
+  $("negative-zh-view").textContent = item.negativeTranslation || "（空）";
+  if (!state.editingTranslation) setIfIdle($("negative-translation"), item.negativeTranslation || "");
+  $("translation-view").textContent = item.translation || "（还没有译文）";
+  if (!state.editingTranslation) setIfIdle($("translation"), item.translation || "");
   const note = noteFor(item);
   $("reader-note").hidden = !note;
   $("reader-note").textContent = note;
+  applyEditChrome();
   $("retranslate").textContent = item._busy ? "翻译中…" : (hasTranslation(item) ? "重新翻译" : "翻译");
   $("retranslate").disabled = Boolean(item._busy);
 }
 
+function applyEditChrome() {
+  const editingEn = state.editingPositive;
+  const editingZh = state.editingTranslation;
+  $("positive-view").hidden = editingEn;
+  $("positive-edit").hidden = !editingEn;
+  $("edit-positive").hidden = editingEn;
+  $("copy-positive").hidden = editingEn;
+  $("save-positive").hidden = !editingEn;
+  $("cancel-positive").hidden = !editingEn;
+  $("translation-view").hidden = editingZh;
+  $("translation").hidden = !editingZh;
+  $("edit-translation").hidden = editingZh;
+  $("copy-zh").hidden = editingZh;
+  $("save-translation").hidden = !editingZh;
+  $("cancel-translation").hidden = !editingZh;
+  $("negative-zh-view").hidden = editingZh;
+  $("negative-translation").hidden = !editingZh || $("negative-zh-block").hidden;
+}
+
+function promptDirty() {
+  const item = activeItem();
+  if (!item) return false;
+  if (state.editingPositive && $("positive-edit").value !== (item.positive || "")) return true;
+  if (!state.editingTranslation) return false;
+  if ($("translation").value !== (item.translation || "")) return true;
+  return !$("negative-zh-block").hidden && $("negative-translation").value !== (item.negativeTranslation || "");
+}
+
+function confirmLeave() {
+  if (!promptDirty()) return true;
+  return confirm("有未保存的修改，离开后会丢掉。继续？");
+}
+
+function applyZoom() {
+  const zoom = state.zoom || 1;
+  $("reader-img").style.transform = `translate(${state.panX || 0}px, ${state.panY || 0}px) scale(${zoom})`;
+  $("frame-zoom").textContent = `${Math.round(zoom * 100)}%`;
+  $("viewport").classList.toggle("can-pan", zoom > 1);
+}
+
+function resetZoom() {
+  state.zoom = 1;
+  state.panX = 0;
+  state.panY = 0;
+  applyZoom();
+}
+
+function setZoom(value) {
+  state.zoom = Math.min(4, Math.max(1, Math.round(value * 100) / 100));
+  if (state.zoom === 1) {
+    state.panX = 0;
+    state.panY = 0;
+  }
+  applyZoom();
+}
+
+function preloadAround(item) {
+  const items = visibleItems();
+  const index = items.findIndex((entry) => entry.id === item.id);
+  if (index < 0 || items.length < 2) return;
+  [index - 1, index + 1].forEach((slot) => {
+    const neighbor = items[(slot + items.length) % items.length];
+    const src = neighbor && safeSrc(neighbor.image);
+    if (!src || src === safeSrc(item.image)) return;
+    const probe = new Image();
+    probe.src = src;
+  });
+}
+
 function syncFrame(item) {
   const img = $("reader-img");
-  const reader = $("reader");
-  const apply = () => {
+  const next = safeSrc(item.image);
+  const paint = () => {
     if (activeItem() !== item) return;
     const meta = item.meta || {};
     const width = img.naturalWidth || Number(meta.width) || 0;
     const height = img.naturalHeight || Number(meta.height) || 0;
-    reader.classList.toggle("is-land", width > 0 && height > 0 && width > height);
+    $("frame-res").textContent = width && height ? `${width} × ${height}` : "";
+    $("stage-blur").style.backgroundImage = next ? `url("${next}")` : "";
   };
-  const next = safeSrc(item.image);
+  const items = visibleItems();
+  const index = items.findIndex((entry) => entry.id === item.id);
+  $("frame-index").textContent = index >= 0 ? `${index + 1} / ${items.length}` : "";
   if (img.getAttribute("src") !== next) {
-    img.onload = apply;
-    img.onerror = apply;
+    resetZoom();
+    img.onload = paint;
+    img.onerror = paint;
     img.src = next;
   }
-  if (img.complete) apply();
-  else {
-    const meta = item.meta || {};
-    const width = Number(meta.width) || 0;
-    const height = Number(meta.height) || 0;
-    if (width && height) reader.classList.toggle("is-land", width > height);
-  }
+  if (img.complete) paint();
+  preloadAround(item);
+}
+
+function setMode(mode) {
+  state.mode = mode;
+  $("reader").dataset.mode = mode;
+  document.querySelectorAll(".modes [data-mode]").forEach((button) => {
+    const on = button.dataset.mode === mode;
+    button.classList.toggle("is-on", on);
+    button.setAttribute("aria-selected", on ? "true" : "false");
+  });
 }
 
 function openReader(id) {
+  if ($("reader").open && state.activeId && state.activeId !== id && !confirmLeave()) return;
   state.activeId = id;
   state.editingPositive = false;
-  $("positive-view").hidden = false;
-  $("positive-edit").hidden = true;
-  $("edit-positive").textContent = "编辑原文";
+  state.editingTranslation = false;
   const opened = activeItem();
-  $("negative-block").open = Boolean(opened && ((opened.negative || "").trim() || (opened.negativeTranslation || "").trim()));
-  $("reader").showModal();
+  $("negative-block").open = Boolean(opened && (opened.negative || "").trim());
+  if (!$("reader").open) $("reader").showModal();
+  setMode(state.mode || "both");
   fillReader();
   location.hash = "item=" + encodeURIComponent(id);
 }
 
-function closeReader() {
+function closeReader(force) {
+  if (!force && !confirmLeave()) return;
   if ($("reader").open) $("reader").close();
 }
 
@@ -359,21 +436,11 @@ async function translateMissing() {
   for (const id of ids) await translateOne(id, false);
 }
 
-function scheduleSave() {
-  const item = activeItem();
-  if (!item) return;
-  item._dirty = true;
-  item.translation = $("translation").value;
-  item.negativeTranslation = $("negative-block").hidden ? item.negativeTranslation : $("negative-translation").value;
-  $("save-state").textContent = "正在输入…";
-  clearTimeout(state.saveTimer);
-  state.saveTimer = setTimeout(() => saveTranslation(), 700);
-}
-
 async function saveTranslation() {
   const item = activeItem();
-  if (!item || !item._dirty) return;
+  if (!item) return;
   const id = item.id;
+  const negative = $("negative-zh-block").hidden ? (item.negativeTranslation || "") : $("negative-translation").value;
   $("save-state").textContent = "保存中…";
   try {
     const data = await api(`/api/items/${encodeURIComponent(id)}`, {
@@ -381,11 +448,11 @@ async function saveTranslation() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         translation: $("translation").value,
-        negativeTranslation: $("negative-block").hidden ? item.negativeTranslation || "" : $("negative-translation").value,
+        negativeTranslation: negative,
       }),
     });
     const latest = state.items.find((entry) => entry.id === id);
-    if (latest) latest._dirty = false;
+    state.editingTranslation = false;
     upsert(data.item, { dirty: false, busy: latest ? latest._busy : false });
     $("save-state").textContent = "已保存";
     render();
@@ -393,6 +460,7 @@ async function saveTranslation() {
   } catch (error) {
     $("save-state").textContent = "没保存上";
     toast(error.message);
+    throw error;
   }
 }
 
@@ -400,16 +468,18 @@ async function savePositive() {
   const item = activeItem();
   if (!item) return;
   const value = $("positive-edit").value;
-  if (value === (item.positive || "")) return;
-  const data = await api(`/api/items/${encodeURIComponent(item.id)}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ positive: value }),
-  });
-  upsert(data.item);
-  render();
+  if (value !== (item.positive || "")) {
+    const data = await api(`/api/items/${encodeURIComponent(item.id)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ positive: value }),
+    });
+    upsert(data.item);
+    render();
+    $("save-state").textContent = "原文已保存";
+  }
+  state.editingPositive = false;
   fillReader();
-  $("save-state").textContent = "原文已保存";
 }
 
 async function removeActive() {
@@ -421,7 +491,7 @@ async function removeActive() {
   if (!confirm(message)) return;
   await api(`/api/items/${encodeURIComponent(item.id)}`, { method: "DELETE" });
   state.items = state.items.filter((entry) => entry.id !== item.id);
-  closeReader();
+  closeReader(true);
   render();
 }
 
@@ -482,56 +552,108 @@ function bind() {
       openReader(card.dataset.id);
     }
   });
-  $("reader-close").addEventListener("click", closeReader);
+  $("reader-close").addEventListener("click", () => closeReader());
+  $("reader").addEventListener("cancel", (event) => {
+    if (!confirmLeave()) event.preventDefault();
+  });
   $("reader").addEventListener("close", () => {
-    const item = activeItem();
-    if (item && item._dirty) {
-      clearTimeout(state.saveTimer);
-      saveTranslation();
-    }
-    if (item && state.editingPositive && $("positive-edit").value !== (item.positive || "")) {
-      const id = item.id;
-      const value = $("positive-edit").value;
-      api(`/api/items/${encodeURIComponent(id)}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ positive: value }),
-      }).then((data) => {
-        upsert(data.item);
-        render();
-      }).catch((error) => toast(error.message));
-    }
     state.activeId = null;
     state.editingPositive = false;
+    state.editingTranslation = false;
+    resetZoom();
+    if (document.fullscreenElement === $("reader")) document.exitFullscreen().catch(() => {});
     if (location.hash.startsWith("#item=")) history.replaceState(null, "", location.pathname + location.search);
   });
   $("prev-item").addEventListener("click", () => step(-1));
   $("next-item").addEventListener("click", () => step(1));
-  $("translation").addEventListener("input", scheduleSave);
-  $("negative-translation").addEventListener("input", scheduleSave);
-  $("edit-positive").addEventListener("click", async () => {
-    state.editingPositive = !state.editingPositive;
-    $("positive-view").hidden = state.editingPositive;
-    $("positive-edit").hidden = !state.editingPositive;
-    $("edit-positive").textContent = state.editingPositive ? "完成" : "编辑原文";
-    if (state.editingPositive) {
-      $("positive-edit").value = (activeItem() || {}).positive || "";
-      $("positive-edit").focus();
-    } else {
-      try {
-        await savePositive();
-      } catch (error) {
-        toast(error.message);
-      }
-    }
+  const markUnsaved = () => {
+    $("save-state").textContent = "未保存";
+  };
+  $("translation").addEventListener("input", markUnsaved);
+  $("negative-translation").addEventListener("input", markUnsaved);
+  $("positive-edit").addEventListener("input", markUnsaved);
+  $("edit-positive").addEventListener("click", () => {
+    state.editingPositive = true;
+    $("positive-edit").value = (activeItem() || {}).positive || "";
+    applyEditChrome();
+    $("positive-edit").focus();
   });
+  $("cancel-positive").addEventListener("click", () => {
+    state.editingPositive = false;
+    $("save-state").textContent = "";
+    fillReader();
+  });
+  $("save-positive").addEventListener("click", () => {
+    savePositive().catch((error) => toast(error.message));
+  });
+  $("edit-translation").addEventListener("click", () => {
+    const item = activeItem() || {};
+    state.editingTranslation = true;
+    $("translation").value = item.translation || "";
+    $("negative-translation").value = item.negativeTranslation || "";
+    applyEditChrome();
+    $("translation").focus();
+  });
+  $("cancel-translation").addEventListener("click", () => {
+    state.editingTranslation = false;
+    $("save-state").textContent = "";
+    fillReader();
+  });
+  $("save-translation").addEventListener("click", () => {
+    saveTranslation().catch(() => {});
+  });
+  document.querySelectorAll(".modes [data-mode]").forEach((button) => {
+    button.addEventListener("click", () => setMode(button.dataset.mode));
+  });
+  $("zoom-in").addEventListener("click", () => setZoom(state.zoom * 1.25));
+  $("zoom-out").addEventListener("click", () => setZoom(state.zoom / 1.25));
+  $("zoom-reset").addEventListener("click", resetZoom);
+  $("zoom-full").addEventListener("click", () => {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else $("reader").requestFullscreen().catch(() => toast("这个浏览器没有打开全屏"));
+  });
+  document.addEventListener("fullscreenchange", () => {
+    $("zoom-full").textContent = document.fullscreenElement ? "退出全屏" : "全屏";
+  });
+  $("reader-img").addEventListener("dblclick", () => setZoom(state.zoom > 1 ? 1 : 2));
+  $("viewport").addEventListener("wheel", (event) => {
+    event.preventDefault();
+    setZoom(state.zoom * (event.deltaY < 0 ? 1.12 : 1 / 1.12));
+  }, { passive: false });
+  let pan = null;
+  $("viewport").addEventListener("pointerdown", (event) => {
+    if (event.button !== 0 || state.zoom <= 1 || event.target.closest("button")) return;
+    pan = { x: event.clientX, y: event.clientY, panX: state.panX, panY: state.panY };
+    $("viewport").classList.add("is-dragging");
+    $("viewport").setPointerCapture(event.pointerId);
+  });
+  $("viewport").addEventListener("pointermove", (event) => {
+    if (!pan) return;
+    state.panX = pan.panX + event.clientX - pan.x;
+    state.panY = pan.panY + event.clientY - pan.y;
+    applyZoom();
+  });
+  const endPan = () => {
+    pan = null;
+    $("viewport").classList.remove("is-dragging");
+  };
+  $("viewport").addEventListener("pointerup", endPan);
+  $("viewport").addEventListener("pointercancel", endPan);
   $("retranslate").addEventListener("click", () => {
     const item = activeItem();
-    if (item) translateOne(item.id, hasTranslation(item)).catch((error) => toast(error.message));
+    if (!item) return;
+    if (state.editingTranslation && promptDirty() && !confirm("重新翻译会丢掉未保存的译文。继续？")) return;
+    state.editingTranslation = false;
+    translateOne(item.id, hasTranslation(item)).catch((error) => toast(error.message));
   });
   $("copy-positive").addEventListener("click", () => copyText((activeItem() || {}).positive || ""));
-  $("copy-zh").addEventListener("click", () => copyText($("translation").value));
-  $("copy-negative-zh").addEventListener("click", () => copyText($("negative-translation").value));
+  $("copy-zh").addEventListener("click", () => copyText((activeItem() || {}).translation || ""));
+  $("copy-both").addEventListener("click", () => {
+    const item = activeItem() || {};
+    const parts = [item.positive, item.translation].filter((text) => (text || "").trim());
+    copyText(parts.join("\n\n"));
+  });
+  $("copy-negative-zh").addEventListener("click", () => copyText((activeItem() || {}).negativeTranslation || ""));
   $("delete-item").addEventListener("click", () => {
     removeActive().catch((error) => toast(error.message));
   });

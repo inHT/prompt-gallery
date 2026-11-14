@@ -41,28 +41,48 @@
   <main id="grid" class="grid" aria-live="polite"></main>
   <p class="foot">图片和修改写在这台机器的 <code>data</code> 目录。原文从图片元数据读取，中文由百度翻译生成，译文可以随时改。</p>
 
-  <dialog id="reader" aria-label="提示词">
+  <dialog id="reader" aria-label="提示词" data-mode="both">
     <div class="reader-layout">
-      <figure class="stage">
-        <img id="reader-img" alt="">
-        <div class="stage-nav">
-          <button type="button" id="prev-item" aria-label="上一张">上一张</button>
-          <button type="button" id="next-item" aria-label="下一张">下一张</button>
+      <section class="stage">
+        <div id="stage-blur" class="stage-blur" aria-hidden="true"></div>
+        <div class="stage-shade" aria-hidden="true"></div>
+        <button type="button" id="prev-item" class="nav-btn prev" aria-label="上一张">上一张</button>
+        <button type="button" id="next-item" class="nav-btn next" aria-label="下一张">下一张</button>
+        <div id="viewport" class="viewport">
+          <img id="reader-img" alt="" draggable="false">
         </div>
-      </figure>
+        <div class="stage-info">
+          <span id="frame-res"></span>
+          <span id="frame-index"></span>
+          <span id="frame-zoom">100%</span>
+          <div class="zoom-tools">
+            <button type="button" id="zoom-out" aria-label="缩小">缩小</button>
+            <button type="button" id="zoom-reset" aria-label="恢复默认比例">适应</button>
+            <button type="button" id="zoom-in" aria-label="放大">放大</button>
+            <button type="button" id="zoom-full" aria-label="全屏">全屏</button>
+          </div>
+        </div>
+      </section>
       <div class="sheet">
         <div class="sheet-bar">
+          <div class="modes" role="tablist" aria-label="提示词显示">
+            <button type="button" class="is-on" data-mode="both" role="tab" aria-selected="true">双语</button>
+            <button type="button" data-mode="en" role="tab" aria-selected="false">英文</button>
+            <button type="button" data-mode="zh" role="tab" aria-selected="false">中文</button>
+          </div>
           <button type="button" id="reader-close" class="btn icon">关闭</button>
         </div>
         <div id="reader-meta" class="chips"></div>
         <p id="reader-warning" class="note warn" hidden></p>
-        <div class="cols">
-          <section class="col">
+        <div class="sheet-scroll">
+          <section class="pane pane-en">
             <div class="label-row">
               <h3>原文提示词</h3>
               <div class="label-actions">
-                <button type="button" id="edit-positive" class="text-btn">编辑原文</button>
+                <button type="button" id="edit-positive" class="text-btn">编辑</button>
                 <button type="button" id="copy-positive" class="text-btn">复制</button>
+                <button type="button" id="save-positive" class="text-btn" hidden>保存</button>
+                <button type="button" id="cancel-positive" class="text-btn" hidden>取消</button>
               </div>
             </div>
             <pre id="positive-view" class="prompt"></pre>
@@ -70,26 +90,36 @@
             <details id="negative-block">
               <summary>反向提示词</summary>
               <pre id="negative-view" class="prompt negative"></pre>
+            </details>
+          </section>
+          <section class="pane pane-zh">
+            <div class="label-row">
+              <h3>中文翻译</h3>
+              <div class="label-actions">
+                <button type="button" id="edit-translation" class="text-btn">编辑</button>
+                <button type="button" id="copy-zh" class="text-btn">复制</button>
+                <button type="button" id="save-translation" class="text-btn" hidden>保存</button>
+                <button type="button" id="cancel-translation" class="text-btn" hidden>取消</button>
+                <span id="save-state" class="save-state"></span>
+              </div>
+            </div>
+            <pre id="translation-view" class="prompt"></pre>
+            <textarea id="translation" class="prompt zh" hidden spellcheck="false" placeholder="译文会出现在这里，也可以直接写"></textarea>
+            <p id="reader-note" class="note"></p>
+            <div id="negative-zh-block">
               <div class="label-row tight">
                 <h3>反向提示词译文</h3>
                 <button type="button" id="copy-negative-zh" class="text-btn">复制</button>
               </div>
-              <textarea id="negative-translation" class="prompt zh" spellcheck="false"></textarea>
-            </details>
-          </section>
-          <section class="col">
-            <div class="label-row">
-              <h3>中文翻译</h3>
-              <span id="save-state" class="save-state"></span>
-            </div>
-            <textarea id="translation" class="prompt zh tall" spellcheck="false" placeholder="译文会出现在这里，也可以直接写"></textarea>
-            <p id="reader-note" class="note"></p>
-            <div class="row-actions">
-              <button type="button" id="retranslate" class="btn primary">翻译</button>
-              <button type="button" id="copy-zh" class="btn ghost">复制译文</button>
-              <button type="button" id="delete-item" class="btn danger">删除</button>
+              <pre id="negative-zh-view" class="prompt negative"></pre>
+              <textarea id="negative-translation" class="prompt zh" hidden spellcheck="false"></textarea>
             </div>
           </section>
+        </div>
+        <div class="sheet-foot">
+          <button type="button" id="retranslate" class="btn primary">翻译</button>
+          <button type="button" id="copy-both" class="btn ghost">复制中英文</button>
+          <button type="button" id="delete-item" class="btn danger">删除</button>
         </div>
       </div>
     </div>
