@@ -41,7 +41,7 @@
   <main id="grid" class="grid" aria-live="polite"></main>
   <p class="foot">图片和修改写在这台机器的 <code>data</code> 目录。原文从图片元数据读取，中文由百度翻译生成，译文可以随时改。</p>
 
-  <dialog id="reader" aria-labelledby="reader-name">
+  <dialog id="reader" aria-label="提示词">
     <div class="reader-layout">
       <figure class="stage">
         <img id="reader-img" alt="">
@@ -52,10 +52,6 @@
       </figure>
       <div class="sheet">
         <div class="sheet-bar">
-          <div>
-            <p id="reader-source" class="eyebrow"></p>
-            <h2 id="reader-name"></h2>
-          </div>
           <button type="button" id="reader-close" class="btn icon">关闭</button>
         </div>
         <div id="reader-meta" class="chips"></div>

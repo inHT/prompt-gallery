@@ -104,11 +104,10 @@ function render() {
     const pill = item._busy ? "翻译中" : translated ? "已有译文" : "未翻译";
     return `<article class="card" data-id="${esc(item.id)}" tabindex="0" role="button">
       <div class="thumb">
-        <img src="${esc(safeSrc(item.image))}" alt="${esc(item.name)}" loading="lazy">
+        <img src="${esc(safeSrc(item.image))}" alt="" loading="lazy">
         <span class="pill${item._busy ? " busy" : ""}">${pill}</span>
       </div>
       <div class="body">
-        <h2>${esc(item.name)}</h2>
         <p class="excerpt${translated ? " zh" : ""}">${esc(excerpt(text))}</p>
       </div>
     </article>`;
@@ -119,7 +118,7 @@ function noteFor(item) {
   if (item.warning && !item.positive) return item.warning;
   if (item.translationFrom === "copy") return "原文主要是中文，译文先按原文填好了，可以直接改。";
   if (item.translationFrom === "manual") return "这是改过的译文。点「翻译」会覆盖它。";
-  if (item.translationFrom === "baidu") return "这段译文来自百度翻译，可以直接改。";
+  if (item.translationFrom === "baidu") return "";
   if (!item.positive) return "没有读到提示词。可以在「编辑原文」里自己贴上，再点翻译。";
   return "还没有译文。点「翻译」会调用百度翻译。";
 }
@@ -147,10 +146,7 @@ function setIfIdle(node, value) {
 function fillReader() {
   const item = activeItem();
   if (!item || !$("reader").open) return;
-  $("reader-name").textContent = item.name || "未命名";
-  $("reader-source").textContent = item._busy ? "正在翻译…" : (item.source || "图片");
-  $("reader-img").src = safeSrc(item.image);
-  $("reader-img").alt = item.name || "";
+  syncFrame(item);
   metaChips(item);
   const warning = $("reader-warning");
   warning.hidden = !item.warning;
@@ -165,9 +161,36 @@ function fillReader() {
     setIfIdle($("negative-translation"), item.negativeTranslation || "");
   }
   setIfIdle($("translation"), item.translation || "");
-  $("reader-note").textContent = noteFor(item);
+  const note = noteFor(item);
+  $("reader-note").hidden = !note;
+  $("reader-note").textContent = note;
   $("retranslate").textContent = item._busy ? "翻译中…" : (hasTranslation(item) ? "重新翻译" : "翻译");
   $("retranslate").disabled = Boolean(item._busy);
+}
+
+function syncFrame(item) {
+  const img = $("reader-img");
+  const reader = $("reader");
+  const apply = () => {
+    if (activeItem() !== item) return;
+    const meta = item.meta || {};
+    const width = img.naturalWidth || Number(meta.width) || 0;
+    const height = img.naturalHeight || Number(meta.height) || 0;
+    reader.classList.toggle("is-land", width > 0 && height > 0 && width > height);
+  };
+  const next = safeSrc(item.image);
+  if (img.getAttribute("src") !== next) {
+    img.onload = apply;
+    img.onerror = apply;
+    img.src = next;
+  }
+  if (img.complete) apply();
+  else {
+    const meta = item.meta || {};
+    const width = Number(meta.width) || 0;
+    const height = Number(meta.height) || 0;
+    if (width && height) reader.classList.toggle("is-land", width > height);
+  }
 }
 
 function openReader(id) {
