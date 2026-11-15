@@ -269,22 +269,109 @@ function setMode(mode) {
   });
 }
 
-function openReader(id) {
+let morphToken = 0;
+
+function containedRect(box, width, height) {
+  if (!width || !height || !box.width || !box.height) return box;
+  const scale = Math.min(box.width / width, box.height / height);
+  const nextWidth = width * scale;
+  const nextHeight = height * scale;
+  return {
+    left: box.left + (box.width - nextWidth) / 2,
+    top: box.top + (box.height - nextHeight) / 2,
+    width: nextWidth,
+    height: nextHeight,
+  };
+}
+
+function placeFlyer(rect) {
+  const flyer = $("morph-flyer");
+  flyer.style.left = rect.left + "px";
+  flyer.style.top = rect.top + "px";
+  flyer.style.width = rect.width + "px";
+  flyer.style.height = rect.height + "px";
+}
+
+function stopMorph() {
+  morphToken += 1;
+  const flyer = $("morph-flyer");
+  flyer.hidden = true;
+  flyer.style.transition = "none";
+  $("reader").classList.remove("is-morphing");
+}
+
+function playMorph(sourceImg) {
+  const reader = $("reader");
+  const flyer = $("morph-flyer");
+  morphToken += 1;
+  const token = morphToken;
+  const from = sourceImg.getBoundingClientRect();
+  flyer.hidden = false;
+  flyer.src = sourceImg.currentSrc || sourceImg.src;
+  flyer.style.transition = "none";
+  flyer.style.objectFit = "cover";
+  flyer.style.borderRadius = "18px";
+  placeFlyer(from);
+  flyer.offsetWidth;
+  const moveMs = 520;
+  window.setTimeout(() => {
+    if (token !== morphToken || !reader.open) return;
+    const view = $("viewport").getBoundingClientRect();
+    const to = containedRect(view, sourceImg.naturalWidth, sourceImg.naturalHeight);
+    flyer.style.transition = `left ${moveMs}ms cubic-bezier(0.22, 0.8, 0.2, 1), top ${moveMs}ms cubic-bezier(0.22, 0.8, 0.2, 1), width ${moveMs}ms cubic-bezier(0.22, 0.8, 0.2, 1), height ${moveMs}ms cubic-bezier(0.22, 0.8, 0.2, 1), border-radius ${moveMs}ms ease`;
+    flyer.style.objectFit = "contain";
+    flyer.style.borderRadius = "2px";
+    placeFlyer(to);
+    window.setTimeout(() => {
+      if (token !== morphToken || !reader.open) return;
+      reader.classList.remove("is-morphing");
+    }, 200);
+    window.setTimeout(() => {
+      if (token !== morphToken) return;
+      flyer.hidden = true;
+      flyer.style.transition = "none";
+    }, moveMs);
+  }, 16);
+}
+
+function openReader(id, sourceImg) {
   if ($("reader").open && state.activeId && state.activeId !== id && !confirmLeave()) return;
+  const opening = !$("reader").open;
+  $("reader").classList.remove("is-closing");
+  if (!opening) stopMorph();
   state.activeId = id;
   state.editingPositive = false;
   state.editingTranslation = false;
   const opened = activeItem();
   $("negative-block").open = Boolean(opened && (opened.negative || "").trim());
-  if (!$("reader").open) $("reader").showModal();
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const morph = opening && sourceImg && !reduce;
+  if (morph) $("reader").classList.add("is-morphing");
+  if (opening) $("reader").showModal();
   setMode(state.mode || "both");
   fillReader();
+  if (morph) playMorph(sourceImg);
   location.hash = "item=" + encodeURIComponent(id);
 }
 
 function closeReader(force) {
+  const reader = $("reader");
+  if (!reader.open || reader.classList.contains("is-closing")) return;
   if (!force && !confirmLeave()) return;
-  if ($("reader").open) $("reader").close();
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  morphToken += 1;
+  const flyer = $("morph-flyer");
+  flyer.hidden = true;
+  flyer.style.transition = "none";
+  reader.classList.remove("is-morphing");
+  if (reduce) {
+    reader.close();
+    return;
+  }
+  reader.classList.add("is-closing");
+  window.setTimeout(() => {
+    if (reader.open) reader.close();
+  }, 200);
 }
 
 function step(delta) {
@@ -542,25 +629,28 @@ function bind() {
   $("settings-btn").addEventListener("click", openSettings);
   $("grid").addEventListener("click", (event) => {
     const card = event.target.closest(".card");
-    if (card) openReader(card.dataset.id);
+    if (card) openReader(card.dataset.id, card.querySelector("img"));
   });
   $("grid").addEventListener("keydown", (event) => {
     const card = event.target.closest(".card");
     if (!card) return;
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      openReader(card.dataset.id);
+      openReader(card.dataset.id, card.querySelector("img"));
     }
   });
   $("reader-close").addEventListener("click", () => closeReader());
   $("reader").addEventListener("cancel", (event) => {
-    if (!confirmLeave()) event.preventDefault();
+    event.preventDefault();
+    closeReader();
   });
   $("reader").addEventListener("close", () => {
+    $("reader").classList.remove("is-closing");
     state.activeId = null;
     state.editingPositive = false;
     state.editingTranslation = false;
     resetZoom();
+    stopMorph();
     if (document.fullscreenElement === $("reader")) document.exitFullscreen().catch(() => {});
     if (location.hash.startsWith("#item=")) history.replaceState(null, "", location.pathname + location.search);
   });
