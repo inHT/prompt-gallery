@@ -4,7 +4,7 @@
 
 ## 这是什么
 
-本地图库：看 AI 图片、读出图片里的提示词、用百度翻译成中文，并允许用户改译文。
+个人站点。提示词图库是其中一个板块：看 AI 图片、读出图片里的提示词、用百度翻译成中文，并允许用户改译文。新板块在 `Site.start()` 之前调用 `Site.register`，登记格式写在 `public/js/site.js` 顶部，模板在 `public/js/sections/template.js`。页头、按钮、卡片、空态和进入动画由站点壳提供，不要另做一套视觉。
 
 页面是静态 HTML / CSS / JS，没有构建步骤。旁边有一个只依赖 Python 标准库的小服务，负责读元数据、代理翻译、把图库写到磁盘。不要引入 npm、打包工具或第三方 Python 包，除非用户明确要求。生成示例图的 `scripts/build_samples.py` 才会用到 Pillow，服务器运行不需要它。
 
@@ -16,7 +16,7 @@
 | --- | --- |
 | `server.py` | HTTP 服务。按 `__file__` 定位项目根，不依赖当前工作目录 |
 | `prompt_meta.py` | 从 PNG / JPEG / WebP 字节里提取提示词。上传和示例图生成都走这里 |
-| `public/` | 唯一对浏览器开放的目录：`index.html`、`css/app.js` 对应的 `js/app.js`、`css/app.css`、`samples/` |
+| `public/` | 唯一对浏览器开放的目录。`index.html` 是站点壳，`css/theme.css` 是壳和进入动画，`css/app.css` 是共用组件和提示词阅读器，`js/site.js` 登记板块，`js/app.js` 是提示词板块，`js/sections/template.js` 是新板块模板，`samples/` 是示例图 |
 | `public/samples/` | 6 张预生成 JPEG 和 `manifest.json`。首次没有 `data/gallery.json` 时用它做种子 |
 | `data/gallery.json` | 图库正文。提示词、译文、模型信息都在这里。运行时生成，已在 `.gitignore` |
 | `data/images/` | 用户上传的原图，文件名是 32 位 hex 加扩展名 |

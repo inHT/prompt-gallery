@@ -58,13 +58,7 @@ async function api(path, options = {}) {
 }
 
 function toast(message) {
-  const node = $("toast");
-  node.textContent = message;
-  node.hidden = false;
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => {
-    node.hidden = true;
-  }, 4200);
+  Site.toast(message);
 }
 
 function visibleItems() {
@@ -292,12 +286,67 @@ function placeFlyer(rect) {
   flyer.style.height = rect.height + "px";
 }
 
+function bloomNodes() {
+  return [$("stage-blur"), document.querySelector("#reader .stage-shade"), document.querySelector("#reader .sheet")];
+}
+
+function localCenter(el, rect) {
+  const box = el.getBoundingClientRect();
+  const scaleX = box.width / el.offsetWidth || 1;
+  const scaleY = box.height / el.offsetHeight || 1;
+  return {
+    x: el.offsetWidth / 2 + (rect.left + rect.width / 2 - (box.left + box.width / 2)) / scaleX,
+    y: el.offsetHeight / 2 + (rect.top + rect.height / 2 - (box.top + box.height / 2)) / scaleY,
+    scale: Math.max(scaleX, scaleY),
+  };
+}
+
+function armBloom(rect) {
+  const soft = 160;
+  bloomNodes().forEach((el) => {
+    if (!el) return;
+    const point = localCenter(el, rect);
+    const width = el.offsetWidth;
+    const height = el.offsetHeight;
+    const farthest = Math.max(
+      Math.hypot(point.x, point.y),
+      Math.hypot(point.x - width, point.y),
+      Math.hypot(point.x, point.y - height),
+      Math.hypot(point.x - width, point.y - height)
+    );
+    const inside = point.x >= 0 && point.y >= 0 && point.x <= width && point.y <= height;
+    const outside = Math.hypot(
+      point.x < 0 ? -point.x : point.x > width ? point.x - width : 0,
+      point.y < 0 ? -point.y : point.y > height ? point.y - height : 0
+    );
+    const from = inside
+      ? Math.min(rect.width, rect.height) / 2 / point.scale
+      : outside + soft * 0.35;
+    el.style.setProperty("--ox", point.x + "px");
+    el.style.setProperty("--oy", point.y + "px");
+    el.style.setProperty("--bloom-from", from + "px");
+    el.style.setProperty("--bloom-end", farthest + soft + 12 + "px");
+  });
+}
+
+function clearBloom() {
+  $("reader").classList.remove("is-bloom");
+  bloomNodes().forEach((el) => {
+    if (!el) return;
+    el.style.removeProperty("--ox");
+    el.style.removeProperty("--oy");
+    el.style.removeProperty("--bloom-from");
+    el.style.removeProperty("--bloom-end");
+  });
+}
+
 function stopMorph() {
   morphToken += 1;
   const flyer = $("morph-flyer");
   flyer.hidden = true;
   flyer.style.transition = "none";
   $("reader").classList.remove("is-morphing");
+  clearBloom();
 }
 
 function playMorph(sourceImg) {
@@ -313,23 +362,31 @@ function playMorph(sourceImg) {
   flyer.style.borderRadius = "18px";
   placeFlyer(from);
   flyer.offsetWidth;
-  const moveMs = 520;
+  const moveMs = 340;
+  const moveEase = "cubic-bezier(0.22, 0.7, 0.48, 0.74)";
   window.setTimeout(() => {
     if (token !== morphToken || !reader.open) return;
     const view = $("viewport").getBoundingClientRect();
     const to = containedRect(view, sourceImg.naturalWidth, sourceImg.naturalHeight);
-    flyer.style.transition = `left ${moveMs}ms cubic-bezier(0.22, 0.8, 0.2, 1), top ${moveMs}ms cubic-bezier(0.22, 0.8, 0.2, 1), width ${moveMs}ms cubic-bezier(0.22, 0.8, 0.2, 1), height ${moveMs}ms cubic-bezier(0.22, 0.8, 0.2, 1), border-radius ${moveMs}ms ease`;
+    armBloom(to);
+    flyer.style.transition = `left ${moveMs}ms ${moveEase}, top ${moveMs}ms ${moveEase}, width ${moveMs}ms ${moveEase}, height ${moveMs}ms ${moveEase}, border-radius ${moveMs}ms ${moveEase}`;
     flyer.style.objectFit = "contain";
     flyer.style.borderRadius = "2px";
     placeFlyer(to);
     window.setTimeout(() => {
       if (token !== morphToken || !reader.open) return;
-      reader.classList.remove("is-morphing");
-    }, 200);
+      reader.classList.add("is-bloom");
+    }, Math.round(moveMs * 0.72));
     window.setTimeout(() => {
-      if (token !== morphToken) return;
+      if (token !== morphToken || !reader.open) return;
       flyer.hidden = true;
       flyer.style.transition = "none";
+      reader.classList.remove("is-morphing");
+      reader.classList.add("is-bloom");
+      window.setTimeout(() => {
+        if (token !== morphToken) return;
+        clearBloom();
+      }, 680);
     }, moveMs);
   }, 16);
 }
@@ -351,27 +408,30 @@ function openReader(id, sourceImg) {
   setMode(state.mode || "both");
   fillReader();
   if (morph) playMorph(sourceImg);
-  location.hash = "item=" + encodeURIComponent(id);
+  const nextHash = "#/prompts/" + encodeURIComponent(id);
+  if (location.hash !== nextHash) location.hash = nextHash;
 }
 
 function closeReader(force) {
   const reader = $("reader");
-  if (!reader.open || reader.classList.contains("is-closing")) return;
-  if (!force && !confirmLeave()) return;
+  if (!reader.open || reader.classList.contains("is-closing")) return true;
+  if (!force && !confirmLeave()) return false;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   morphToken += 1;
   const flyer = $("morph-flyer");
   flyer.hidden = true;
   flyer.style.transition = "none";
   reader.classList.remove("is-morphing");
+  clearBloom();
   if (reduce) {
     reader.close();
-    return;
+    return true;
   }
   reader.classList.add("is-closing");
   window.setTimeout(() => {
     if (reader.open) reader.close();
   }, 200);
+  return true;
 }
 
 function step(delta) {
@@ -405,11 +465,6 @@ async function loadGallery() {
   const data = await api("/api/gallery");
   state.items = data.items.map((item) => ({ ...item, _busy: false, _dirty: false }));
   render();
-  const hash = location.hash.match(/^#item=([^&]+)/);
-  if (hash) {
-    const id = decodeURIComponent(hash[1]);
-    if (state.items.some((item) => item.id === id)) openReader(id);
-  }
 }
 
 function showBanner() {
@@ -652,7 +707,9 @@ function bind() {
     resetZoom();
     stopMorph();
     if (document.fullscreenElement === $("reader")) document.exitFullscreen().catch(() => {});
-    if (location.hash.startsWith("#item=")) history.replaceState(null, "", location.pathname + location.search);
+    if (/^#\/prompts\//.test(location.hash) || location.hash.startsWith("#item=")) {
+      history.replaceState(null, "", location.pathname + location.search + "#/prompts");
+    }
   });
   $("prev-item").addEventListener("click", () => step(-1));
   $("next-item").addEventListener("click", () => step(1));
@@ -799,18 +856,22 @@ function bind() {
   });
   let dragDepth = 0;
   window.addEventListener("dragenter", (event) => {
+    if (Site.current() !== "prompts") return;
     if (![...event.dataTransfer.items].some((item) => item.kind === "file")) return;
     dragDepth += 1;
     $("drop").hidden = false;
   });
   window.addEventListener("dragover", (event) => {
+    if (Site.current() !== "prompts") return;
     if ([...event.dataTransfer.items].some((item) => item.kind === "file")) event.preventDefault();
   });
   window.addEventListener("dragleave", () => {
+    if (Site.current() !== "prompts") return;
     dragDepth = Math.max(0, dragDepth - 1);
     if (!dragDepth) $("drop").hidden = true;
   });
   window.addEventListener("drop", (event) => {
+    if (Site.current() !== "prompts") return;
     dragDepth = 0;
     $("drop").hidden = true;
     if (event.dataTransfer.files.length) {
@@ -820,7 +881,59 @@ function bind() {
   });
 }
 
-bind();
-boot().catch((error) => {
-  $("grid").innerHTML = `<div class="empty"><h2>没有打开图库</h2><p>${esc(error.message)}</p></div>`;
+let promptsBoot = null;
+
+function mountPrompts() {
+  if (!promptsBoot) {
+    bind();
+    promptsBoot = boot().catch((error) => {
+      $("grid").innerHTML = `<div class="empty"><h2>没有打开图库</h2><p>${esc(error.message)}</p></div>`;
+    });
+  }
+  return promptsBoot;
+}
+
+function leavePrompts() {
+  $("drop").hidden = true;
+  const reader = $("reader");
+  if (reader.open && !confirmLeave()) {
+    const nextHash = state.activeId ? "#/prompts/" + encodeURIComponent(state.activeId) : "#/prompts";
+    if (location.hash !== nextHash) location.hash = nextHash;
+    return false;
+  }
+  if (reader.open) {
+    morphToken += 1;
+    reader.classList.remove("is-morphing", "is-closing", "is-bloom");
+    clearBloom();
+    reader.close();
+  }
+  if ($("settings").open) $("settings").close();
+  return true;
+}
+
+function openFromRoute(rest) {
+  const id = rest && rest[0] ? rest[0] : "";
+  if (!id) {
+    if ($("reader").open && !closeReader(false)) {
+      const nextHash = "#/prompts/" + encodeURIComponent(state.activeId);
+      if (location.hash !== nextHash) location.hash = nextHash;
+    }
+    return;
+  }
+  if (state.activeId === id && $("reader").open) return;
+  if (state.items.some((item) => item.id === id)) openReader(id);
+}
+
+Site.register({
+  id: "prompts",
+  mark: "词",
+  eyebrow: "AI 图片提示词",
+  title: "看图，读提示词",
+  navLabel: "提示词",
+  summary: "看图，读出提示词，译成中文，译文可以改。",
+  order: 10,
+  element: "view-prompts",
+  mount: mountPrompts,
+  unmount: leavePrompts,
+  onRoute(_ctx, rest) { openFromRoute(rest); },
 });

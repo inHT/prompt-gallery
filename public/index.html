@@ -4,11 +4,34 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex">
-  <title>提示词</title>
+  <title>站点</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body>
+  <header class="sitebar">
+    <a class="site-brand" href="#/">
+      <span class="mark" aria-hidden="true">站</span>
+      <span class="site-name">站点</span>
+    </a>
+    <nav id="site-nav" class="site-nav" aria-label="板块"></nav>
+  </header>
+
+  <div id="view-home" class="view" hidden>
+    <header class="top">
+      <div class="brand">
+        <span class="mark" aria-hidden="true">站</span>
+        <div>
+          <p class="eyebrow">个人站点</p>
+          <h1>选一个板块</h1>
+        </div>
+      </div>
+    </header>
+    <div id="home-grid" class="home-grid"></div>
+  </div>
+
+  <section id="view-prompts" class="view" hidden>
   <header class="top">
     <div class="brand">
       <span class="mark" aria-hidden="true">词</span>
@@ -40,6 +63,22 @@
   <p id="count" class="count"></p>
   <main id="grid" class="grid" aria-live="polite"></main>
   <p class="foot">图片和修改写在这台机器的 <code>data</code> 目录。原文从图片元数据读取，中文由百度翻译生成，译文可以随时改。</p>
+  </section>
+
+  <div id="view-mount" class="view" hidden>
+    <header class="top">
+      <div class="brand">
+        <span class="mark" id="mount-mark" aria-hidden="true"></span>
+        <div>
+          <p class="eyebrow" id="mount-eyebrow"></p>
+          <h1 id="mount-title"></h1>
+        </div>
+      </div>
+      <div class="tools" id="mount-tools"></div>
+    </header>
+    <div id="mount-stage"></div>
+    <p id="mount-foot" class="foot" hidden></p>
+  </div>
 
   <dialog id="reader" aria-label="提示词" data-mode="both">
     <img id="morph-flyer" class="morph-flyer" alt="" hidden>
@@ -166,6 +205,9 @@
   <div id="drop" class="drop" hidden>松开即可添加图片</div>
   <div id="toast" class="toast" hidden role="status"></div>
   <noscript><p class="banner">需要启用 JavaScript。</p></noscript>
+  <script src="js/site.js"></script>
   <script src="js/app.js"></script>
+  <!-- 新板块脚本放在下一行之前，并在脚本里调用 Site.register。模板见 js/sections/template.js。 -->
+  <script>Site.start();</script>
 </body>
 </html>

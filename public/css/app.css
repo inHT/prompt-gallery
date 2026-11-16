@@ -200,6 +200,11 @@ h3 { margin: 0; font-size: 16px; }
   line-height: 1.6;
 }
 
+@property --bloom {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
 dialog { color: inherit; }
 dialog::backdrop {
   background: rgba(24, 18, 14, 0.5);
@@ -223,6 +228,10 @@ dialog::backdrop {
   background: transparent;
   box-shadow: none;
   overflow: visible;
+}
+#reader.is-bloom {
+  background: transparent;
+  overflow: hidden;
 }
 #reader.is-morphing::backdrop {
   background: transparent;
@@ -267,13 +276,31 @@ dialog::backdrop {
   overflow: hidden;
   transition: background 0.34s ease;
 }
-#reader.is-morphing .stage { background: transparent; }
-#reader.is-morphing .stage-blur,
-#reader.is-morphing .stage-shade,
+#reader.is-morphing .stage,
+#reader.is-bloom .stage { background: transparent; }
 #reader.is-morphing .stage-info,
 #reader.is-morphing #reader-img { opacity: 0; }
 #reader.is-morphing #reader-img { transition: none; }
-.stage-blur, .stage-shade, .stage-info { transition: opacity 0.34s ease; }
+.stage-blur, .stage-shade, .stage-info { transition: opacity 0.36s ease; }
+#reader.is-morphing .stage-blur,
+#reader.is-morphing .stage-shade,
+#reader.is-morphing .sheet,
+#reader.is-bloom .stage-blur,
+#reader.is-bloom .stage-shade,
+#reader.is-bloom .sheet {
+  --bloom: var(--bloom-from);
+  opacity: 0;
+  -webkit-mask-image: radial-gradient(circle at var(--ox, 50%) var(--oy, 50%), #000 calc(var(--bloom) - 160px), transparent var(--bloom));
+  mask-image: radial-gradient(circle at var(--ox, 50%) var(--oy, 50%), #000 calc(var(--bloom) - 160px), transparent var(--bloom));
+  transition: none;
+}
+#reader.is-bloom .stage-blur,
+#reader.is-bloom .stage-shade,
+#reader.is-bloom .sheet {
+  --bloom: var(--bloom-end);
+  opacity: 1;
+  transition: --bloom 0.64s cubic-bezier(0.22, 0.55, 0.2, 1);
+}
 .stage-blur {
   position: absolute;
   inset: -12%;
@@ -359,11 +386,6 @@ dialog::backdrop {
   padding: 14px 18px calc(12px + env(safe-area-inset-bottom));
   background: var(--paper);
   border-left: 1px solid var(--line);
-  transition: opacity 0.34s ease, transform 0.34s cubic-bezier(0.22, 0.8, 0.2, 1);
-}
-#reader.is-morphing .sheet {
-  opacity: 0;
-  transform: translateY(18px);
 }
 .sheet-bar { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
 .modes { display: flex; gap: 4px; padding: 3px; border-radius: 999px; background: #f3ece4; }
@@ -527,5 +549,6 @@ summary { cursor: pointer; color: var(--muted); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card, #reader, #reader .sheet, .stage, .stage-blur, .stage-shade, .stage-info, #reader-img, dialog::backdrop, .morph-flyer { transition: none; }
+  .card, #reader, #reader .sheet, .stage, .stage-blur, .stage-shade, .stage-info, #reader-img, dialog::backdrop, .morph-flyer,
+  #reader.is-bloom .stage-blur, #reader.is-bloom .stage-shade, #reader.is-bloom .sheet { transition: none; }
 }
