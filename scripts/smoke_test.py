@@ -140,7 +140,36 @@ def main():
     ids = {entry["id"] for entry in json.loads(body)["items"]}
     assert item["id"] not in ids and comfy["item"]["id"] not in ids
     assert "sample-01" in ids
-    print("smoke ok", len(ids), "items")
+
+    status, _headers, body = request("GET", "/js/sections/lora.js")
+    assert status == 200 and b"Site.register" in body
+
+    status, _headers, body = request(
+        "POST",
+        "/api/loras",
+        json.dumps(
+            {"name": "冒烟 LoRA", "base": "krea2", "summary": "测试", "url": "https://example.com/lora"},
+            ensure_ascii=False,
+        ).encode("utf-8"),
+        {"Content-Type": "application/json"},
+    )
+    created = json.loads(body)
+    assert status == 200, created
+    lora_id = created["item"]["id"]
+    status, _headers, body = request(
+        "POST",
+        "/api/loras/" + lora_id + "/images",
+        tiny_png(),
+        {"Content-Type": "image/png", "X-Filename": "sample.png"},
+    )
+    uploaded = json.loads(body)
+    assert status == 200 and uploaded["item"]["images"], uploaded
+    status, _headers, body = request("DELETE", "/api/loras/" + lora_id)
+    assert status == 200, body
+    status, _headers, body = request("GET", "/api/loras")
+    lora_ids = {entry["id"] for entry in json.loads(body)["items"]}
+    assert lora_id not in lora_ids
+    print("smoke ok", len(ids), "items", len(lora_ids), "loras")
 
 
 if __name__ == "__main__":

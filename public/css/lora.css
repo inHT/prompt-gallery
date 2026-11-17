@@ -1,0 +1,141 @@
+#lora-reader {
+  width: min(1760px, 94vw);
+  height: 92vh;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  padding: 0;
+  background: var(--paper);
+  border-radius: 16px;
+  box-shadow: 0 30px 80px rgba(40, 24, 12, 0.28);
+  overflow: hidden;
+  color: inherit;
+  transition: background 0.34s ease, box-shadow 0.34s ease, opacity 0.2s ease;
+}
+#lora-reader[open] { display: flex; }
+#lora-reader .reader-layout { flex: 1; min-width: 0; }
+#lora-reader.is-morphing {
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+#lora-reader.is-bloom { background: transparent; overflow: hidden; }
+#lora-reader.is-morphing::backdrop { background: transparent; backdrop-filter: none; }
+#lora-reader.is-closing { opacity: 0; }
+#lora-reader.is-closing::backdrop {
+  background: transparent;
+  backdrop-filter: none;
+  transition-duration: 0.2s;
+}
+#lora-reader.is-morphing .stage,
+#lora-reader.is-bloom .stage { background: transparent; }
+#lora-reader.is-morphing #lora-img { opacity: 0; transition: none; }
+#lora-reader .stage-blur,
+#lora-reader .stage-shade,
+#lora-reader .stage-info { transition: opacity 0.36s ease; }
+#lora-reader.is-morphing .stage-blur,
+#lora-reader.is-morphing .stage-shade,
+#lora-reader.is-morphing .sheet,
+#lora-reader.is-bloom .stage-blur,
+#lora-reader.is-bloom .stage-shade,
+#lora-reader.is-bloom .sheet {
+  --bloom: var(--bloom-from);
+  opacity: 0;
+  -webkit-mask-image: radial-gradient(circle at var(--ox, 50%) var(--oy, 50%), #000 calc(var(--bloom) - 160px), transparent var(--bloom));
+  mask-image: radial-gradient(circle at var(--ox, 50%) var(--oy, 50%), #000 calc(var(--bloom) - 160px), transparent var(--bloom));
+  transition: none;
+}
+#lora-reader.is-bloom .stage-blur,
+#lora-reader.is-bloom .stage-shade,
+#lora-reader.is-bloom .sheet {
+  --bloom: var(--bloom-end);
+  opacity: 1;
+  transition: --bloom 0.64s cubic-bezier(0.22, 0.55, 0.2, 1);
+}
+#lora-reader .viewport { inset: 0 0 132px; }
+#lora-reader .sheet-bar h2 {
+  margin: 0;
+  min-width: 0;
+  font-size: 22px;
+  line-height: 1.35;
+}
+#lora-reader .sheet-scroll h3 { margin: 14px 0 8px; }
+#lora-reader .sheet-scroll h3:first-child { margin-top: 4px; }
+.lora-thumbs {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 48px;
+  z-index: 2;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  overflow: auto;
+}
+.lora-thumbs button {
+  width: 52px;
+  height: 68px;
+  padding: 0;
+  flex: none;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  overflow: hidden;
+  background: #111;
+}
+.lora-thumbs button.is-on { border-color: #f6efe6; }
+.lora-thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lora-url { margin: 0; word-break: break-all; line-height: 1.6; }
+.lora-url a { color: var(--accent); }
+.lora-card .lora-title {
+  margin: 0 0 6px;
+  font-family: var(--serif);
+  font-size: 18px;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+#lora-form {
+  width: min(560px, calc(100vw - 28px));
+  border: 0;
+  border-radius: 20px;
+  padding: 22px;
+  background: var(--paper);
+  color: inherit;
+  box-shadow: var(--shadow);
+}
+#lora-form form { display: grid; gap: 10px; }
+#lora-form label { display: grid; gap: 6px; font-size: 14px; }
+#lora-form input,
+#lora-form textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #fff;
+}
+#lora-form textarea { min-height: 140px; resize: vertical; }
+
+@media (max-width: 767px) {
+  #lora-reader {
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
+  }
+  #lora-reader .viewport { inset: 0 0 96px; }
+  .lora-thumbs { bottom: 40px; }
+  .lora-thumbs button { width: 40px; height: 52px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #lora-reader,
+  #lora-reader .sheet,
+  #lora-reader .stage,
+  #lora-reader .stage-blur,
+  #lora-reader .stage-shade,
+  #lora-reader .stage-info,
+  #lora-reader.is-bloom .stage-blur,
+  #lora-reader.is-bloom .stage-shade,
+  #lora-reader.is-bloom .sheet { transition: none; }
+}

@@ -28,6 +28,9 @@ IMAGES = DATA / "images"
 GALLERY_PATH = DATA / "gallery.json"
 CRED_PATH = ROOT / "百度翻译api.txt"
 MANIFEST_PATH = PUBLIC / "samples" / "manifest.json"
+LORA_PATH = DATA / "loras.json"
+LORA_IMAGES = DATA / "lora-images"
+LORA_MANIFEST = PUBLIC / "lora-samples" / "manifest.json"
 
 HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8765"))
@@ -36,8 +39,12 @@ MAX_UPLOAD = 40 * 1024 * 1024
 BAIDU_URL = "https://fanyi-api.baidu.com/api/trans/vip/translate"
 ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,80}$")
 MEDIA_RE = re.compile(r"^[a-f0-9]{32}\.(png|jpg|webp)$")
+LORA_SAMPLE_RE = re.compile(r"^[A-Za-z0-9_-]{1,80}/[0-9]{2}\.(jpg|png|webp)$")
+MAX_LORA_IMAGES = 8
+MAX_LORA_SUMMARY = 12000
 
 GALLERY_LOCK = threading.Lock()
+LORA_LOCK = threading.Lock()
 PACE_LOCK = threading.Lock()
 LAST_BAIDU_CALL = 0.0
 
@@ -372,6 +379,125 @@ def cookie_map(header: str) -> dict[str, str]:
     return found
 
 
+def clean_http_url(value: str) -> str:
+    value = (value or "").strip()
+    if not value:
+        return ""
+    if len(value) > 500 or any(char.isspace() for char in value):
+        raise ValueError("网址格式不对")
+    parts = urllib.parse.urlsplit(value)
+    if parts.scheme not in ("http", "https") or not parts.netloc:
+        raise ValueError("网址需要以 http:// 或 https:// 开头")
+    return value
+
+
+def sample_image_url(name: str) -> str:
+    name = (name or "").replace("\\", "/").lstrip("/")
+    if name.startswith("lora-samples/"):
+        name = name[len("lora-samples/") :]
+    if not LORA_SAMPLE_RE.match(name):
+        return ""
+    target = (PUBLIC / "lora-samples" / name).resolve()
+    root = (PUBLIC / "lora-samples").resolve()
+    try:
+        target.relative_to(root)
+    except ValueError:
+        return ""
+    if not target.is_file():
+        return ""
+    return "/lora-samples/" + name
+
+
+def lora_manifest_items() -> list[dict]:
+    if not LORA_MANIFEST.exists():
+        return []
+    raw = json.loads(LORA_MANIFEST.read_text(encoding="utf-8"))
+    now = time.time()
+    items = []
+    for index, row in enumerate(raw.get("items") or []):
+        item_id = str(row.get("id") or "")
+        if not ID_RE.match(item_id):
+            continue
+        images = []
+        for image in row.get("images") or []:
+            url = sample_image_url(str(image))
+            if url and url not in images:
+                images.append(url)
+        items.append(
+            {
+                "id": item_id,
+                "name": str(row.get("name") or item_id)[:120],
+                "base": str(row.get("base") or "krea2")[:80],
+                "summary": str(row.get("summary") or "")[:MAX_LORA_SUMMARY],
+                "url": str(row.get("url") or "")[:500],
+                "images": images[:MAX_LORA_IMAGES],
+                "sample": True,
+                "created": now - index,
+            }
+        )
+    return items
+
+
+def empty_loras() -> dict:
+    return {"items": lora_manifest_items()}
+
+
+def load_loras() -> dict:
+    if not LORA_PATH.exists():
+        data = empty_loras()
+        save_loras(data)
+        return data
+    data = json.loads(LORA_PATH.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or not isinstance(data.get("items"), list):
+        raise RuntimeError("data/loras.json 格式不对")
+    return data
+
+
+def save_loras(data: dict) -> None:
+    DATA.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(data, ensure_ascii=False, indent=2)
+    temporary = LORA_PATH.with_suffix(".json.tmp")
+    temporary.write_text(payload, encoding="utf-8")
+    temporary.replace(LORA_PATH)
+
+
+def lora_media_name(url: str) -> str:
+    name = (url or "").rsplit("/", 1)[-1]
+    return name if MEDIA_RE.match(name) else ""
+
+
+def public_lora(item: dict) -> dict:
+    images = []
+    for image in item.get("images") or []:
+        if not isinstance(image, str):
+            continue
+        if image.startswith("/lora-samples/"):
+            url = sample_image_url(image)
+        elif image.startswith("/lora-media/") and lora_media_name(image):
+            url = "/lora-media/" + lora_media_name(image)
+        else:
+            url = ""
+        if url and url not in images:
+            images.append(url)
+    return {
+        "id": item.get("id") or "",
+        "name": item.get("name") or "",
+        "base": item.get("base") or "",
+        "summary": item.get("summary") or "",
+        "url": item.get("url") or "",
+        "images": images,
+        "sample": bool(item.get("sample")),
+        "created": item.get("created") or 0,
+    }
+
+
+def find_lora(data: dict, item_id: str) -> dict | None:
+    for item in data["items"]:
+        if item.get("id") == item_id:
+            return item
+    return None
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "prompt-gallery/1.0"
 
@@ -468,10 +594,27 @@ class Handler(BaseHTTPRequestHandler):
             items = sorted(data["items"], key=lambda item: item.get("created") or 0, reverse=True)
             self.send_json(200, {"ok": True, "items": [public_item(item) for item in items]})
             return
+        if path == "/api/loras":
+            if not self.require_auth():
+                return
+            try:
+                with LORA_LOCK:
+                    data = load_loras()
+            except (RuntimeError, json.JSONDecodeError) as exc:
+                self.send_json(500, {"ok": False, "error": str(exc)})
+                return
+            items = sorted(data["items"], key=lambda item: item.get("created") or 0, reverse=True)
+            self.send_json(200, {"ok": True, "items": [public_lora(item) for item in items]})
+            return
         if path.startswith("/media/"):
             if not self.require_auth():
                 return
             self.serve_media(path[len("/media/") :])
+            return
+        if path.startswith("/lora-media/"):
+            if not self.require_auth():
+                return
+            self.serve_lora_media(path[len("/lora-media/") :])
             return
         self.serve_static(path)
 
@@ -494,6 +637,13 @@ class Handler(BaseHTTPRequestHandler):
             elif path.startswith("/api/items/") and path.endswith("/translate"):
                 item_id = path[len("/api/items/") : -len("/translate")].strip("/")
                 self.handle_translate(item_id)
+            elif path == "/api/loras":
+                self.handle_lora_create()
+            elif path == "/api/loras/restore":
+                self.handle_lora_restore()
+            elif path.startswith("/api/loras/") and path.endswith("/images"):
+                item_id = path[len("/api/loras/") : -len("/images")].strip("/")
+                self.handle_lora_image(item_id)
             else:
                 self.send_json(404, {"ok": False, "error": "没有这个接口"})
         except ValueError as exc:
@@ -523,6 +673,9 @@ class Handler(BaseHTTPRequestHandler):
         if not self.require_auth():
             return
         path = self.path_only()
+        if path.startswith("/api/loras/"):
+            self.handle_lora_delete(path[len("/api/loras/") :].strip("/"))
+            return
         prefix = "/api/items/"
         if not path.startswith(prefix):
             self.send_json(404, {"ok": False, "error": "没有这个接口"})
@@ -716,6 +869,113 @@ class Handler(BaseHTTPRequestHandler):
             save_gallery(gallery)
         self.send_json(200, {"ok": True, "added": added})
 
+    def handle_lora_create(self) -> None:
+        body = self.read_json()
+        name = str(body.get("name") or "").strip()
+        base = str(body.get("base") or "").strip()
+        if not name:
+            raise ValueError("请填写名称")
+        if not base:
+            raise ValueError("请填写底模")
+        item = {
+            "id": uuid.uuid4().hex,
+            "name": name[:120],
+            "base": base[:80],
+            "summary": str(body.get("summary") or "")[:MAX_LORA_SUMMARY],
+            "url": clean_http_url(str(body.get("url") or "")),
+            "images": [],
+            "sample": False,
+            "created": time.time(),
+        }
+        with LORA_LOCK:
+            data = load_loras()
+            data["items"].append(item)
+            save_loras(data)
+        self.send_json(200, {"ok": True, "item": public_lora(item)})
+
+    def handle_lora_image(self, item_id: str) -> None:
+        if not ID_RE.match(item_id):
+            raise ValueError("编号无效")
+        filename = clean_filename(self.headers.get("X-Filename") or "image.png")
+        payload = self.read_body(MAX_UPLOAD)
+        if not payload:
+            raise ValueError("文件是空的")
+        ext = sniff_ext(payload, filename)
+        image_id = uuid.uuid4().hex
+        LORA_IMAGES.mkdir(parents=True, exist_ok=True)
+        (LORA_IMAGES / f"{image_id}.{ext}").write_bytes(payload)
+        image_url = f"/lora-media/{image_id}.{ext}"
+        with LORA_LOCK:
+            data = load_loras()
+            item = find_lora(data, item_id)
+            if item is None:
+                target = LORA_IMAGES / f"{image_id}.{ext}"
+                if target.is_file():
+                    target.unlink()
+                self.send_json(404, {"ok": False, "error": "找不到这个 LoRA"})
+                return
+            images = [image for image in item.get("images") or [] if isinstance(image, str)]
+            if len(images) >= MAX_LORA_IMAGES:
+                target = LORA_IMAGES / f"{image_id}.{ext}"
+                if target.is_file():
+                    target.unlink()
+                raise ValueError(f"每个 LoRA 最多 {MAX_LORA_IMAGES} 张样例图")
+            images.append(image_url)
+            item["images"] = images
+            save_loras(data)
+            self.send_json(200, {"ok": True, "item": public_lora(item)})
+
+    def handle_lora_delete(self, item_id: str) -> None:
+        if not ID_RE.match(item_id):
+            self.send_json(400, {"ok": False, "error": "编号无效"})
+            return
+        with LORA_LOCK:
+            data = load_loras()
+            kept = []
+            removed = None
+            for item in data["items"]:
+                if item.get("id") == item_id and removed is None:
+                    removed = item
+                else:
+                    kept.append(item)
+            if removed is None:
+                self.send_json(404, {"ok": False, "error": "找不到这个 LoRA"})
+                return
+            data["items"] = kept
+            save_loras(data)
+        for image in removed.get("images") or []:
+            if not isinstance(image, str) or not image.startswith("/lora-media/"):
+                continue
+            name = lora_media_name(image)
+            if not name:
+                continue
+            target = (LORA_IMAGES / name).resolve()
+            if target.is_file() and target.parent == LORA_IMAGES.resolve():
+                target.unlink()
+        self.send_json(200, {"ok": True})
+
+    def handle_lora_restore(self) -> None:
+        added = 0
+        with LORA_LOCK:
+            data = load_loras()
+            existing = {item.get("id") for item in data["items"]}
+            for item in lora_manifest_items():
+                if item["id"] not in existing:
+                    data["items"].append(item)
+                    added += 1
+            save_loras(data)
+        self.send_json(200, {"ok": True, "added": added})
+
+    def serve_lora_media(self, name: str) -> None:
+        if not MEDIA_RE.match(name):
+            self.send_error(404)
+            return
+        target = (LORA_IMAGES / name).resolve()
+        if target.parent != LORA_IMAGES.resolve() or not target.is_file():
+            self.send_error(404)
+            return
+        self.serve_file(target, cache=False)
+
     def serve_media(self, name: str) -> None:
         if not MEDIA_RE.match(name):
             self.send_error(404)
@@ -773,9 +1033,12 @@ def main() -> None:
     args = parser.parse_args()
     DATA.mkdir(parents=True, exist_ok=True)
     IMAGES.mkdir(parents=True, exist_ok=True)
+    LORA_IMAGES.mkdir(parents=True, exist_ok=True)
     try:
         with GALLERY_LOCK:
             load_gallery()
+        with LORA_LOCK:
+            load_loras()
     except (RuntimeError, json.JSONDecodeError) as exc:
         raise SystemExit(str(exc))
     status = credential_status()

@@ -1,0 +1,107 @@
+{
+  "items": [
+    {
+      "id": "auroral-nostalgia",
+      "name": "AURORAL Nostalgia · 极光旧梦",
+      "base": "krea2",
+      "summary": "触发词\n没有。效果会自动生效——只需描述你的主题和场景即可。\n\n它的作用\n光照：暖色定向光，金色边缘光和边缘光晕，柔和的光晕/晕光，更强的光区和阴影分离。\n质量：更清晰的渲染，线条和细节保持更细腻，色调渐变更平滑，景深柔和，胶片颗粒感细腻——呈现“完成的插画”效果，而非平面输出。\n色彩：冷暖分离，带有怀旧感的胶片级，更丰富但不会过饱和。\n推荐浓度\n1.0 — 设计强度：清晰的灯光和质量提升，内容保持完整。\n1.3 – 1.5 — 明显更强的光晕、光晕和薄膜特性。我们自己的画廊样品是1.5。\n0.8及以下——效果会迅速消退。\n在Turbo/量化Krea 2检查点上，这种效果比全精度基础略弱一些。\n最适合\n动漫及半写实动漫插画——单人角色、半身或全身。\n写实/摄影肖像和场景——LoRA自然塑造光线，并在写实基础上叠加胶片等级。\n利用氛围营造的场景：黄昏、夜晚街道、灯笼光、室内、花园、窗户光。\n那些已经能很好地描述主题的提示——让这个LoRA提供光明和收尾。你自己的风格词会稀释它。\n诚实的限制\n你题目中明确的风格会获胜。如果你要求完全平坦、无光的卡通渲染，LoRA主要会添加颜色和颗粒感，而不是重新绘制光线。\n最好用纯内容提示（主题/框架/场景），而不是堆叠式的关键词。\n在1.5+的非常柔和或低细节场景中，会用一些微观细节换取氛围;当你想要纹理回来时，可以降到1.0–1.2。\n注释\n所有图库采样均使用该LoRA生成，运行于Krea 2,10步，CFG 1.0，欧拉/简单，短边1024像素。生成数据是公开的——打开任何示例图片即可阅读其完整的提示和设置。",
+      "url": "https://civitai.com/models/3001800/auroral-nostalgia",
+      "images": [
+        "auroral-nostalgia/01.jpg",
+        "auroral-nostalgia/02.jpg",
+        "auroral-nostalgia/03.jpg",
+        "auroral-nostalgia/04.jpg",
+        "auroral-nostalgia/05.jpg"
+      ]
+    },
+    {
+      "id": "anime-in-real",
+      "name": "Anime in real",
+      "base": "krea2",
+      "summary": "这个Lora专注于在现实背景中塑造动漫角色，非常适合以下内容：\nSolo\nDepth of field\nBlurry background\n独唱\n景深\n模糊的背景\n\n有一个触发词，激活Lora非常重要：Ani2rel",
+      "url": "https://civitai.com/models/1979448/anime-in-real",
+      "images": [
+        "anime-in-real/01.jpg",
+        "anime-in-real/02.jpg",
+        "anime-in-real/03.jpg",
+        "anime-in-real/04.jpg",
+        "anime-in-real/05.jpg"
+      ]
+    },
+    {
+      "id": "z3zz4-krea-2",
+      "name": "Z3ZZ4 Krea 2",
+      "base": "krea2",
+      "summary": "无",
+      "url": "https://civitai.com/models/2771337/z3zz4-krea-2",
+      "images": [
+        "z3zz4-krea-2/01.jpg",
+        "z3zz4-krea-2/02.jpg",
+        "z3zz4-krea-2/03.jpg",
+        "z3zz4-krea-2/04.jpg",
+        "z3zz4-krea-2/05.jpg"
+      ]
+    },
+    {
+      "id": "koukouya-style",
+      "name": "画风 こうこうや koukouya style [krea2]",
+      "base": "krea2",
+      "summary": "该模型不需要触发词\n推荐出图参数：\n分辨率：竖屏1280x1856（1536x1536）\nlora权重1.0\n采样er_sde简单采样次数8",
+      "url": "https://civitai.com/models/2844656/koukouya-style-krea2",
+      "images": [
+        "koukouya-style/01.jpg",
+        "koukouya-style/02.jpg",
+        "koukouya-style/03.jpg",
+        "koukouya-style/04.jpg",
+        "koukouya-style/05.jpg"
+      ]
+    },
+    {
+      "id": "kok0ya",
+      "name": "Kok0ya |椎白的风格",
+      "base": "krea2",
+      "summary": "权重可从 0.1 到 1",
+      "url": "https://civitai.com/models/3038150/kok0ya-or-shiiros-styles",
+      "images": [
+        "kok0ya/01.jpg",
+        "kok0ya/02.jpg",
+        "kok0ya/03.jpg",
+        "kok0ya/04.jpg",
+        "kok0ya/05.jpg"
+      ]
+    },
+    {
+      "id": "si-wooupp",
+      "name": "Krea2 si_(wooupp) Style",
+      "base": "krea2",
+      "summary": "没有触发词\nmaybe 1000steps比2500steps效果更好，但我懒得再进一步测试XD\n例图由1000steps生成",
+      "url": "https://civitai.com/models/2767709/krea2-siwooupp-style",
+      "images": [
+        "si-wooupp/01.jpg",
+        "si-wooupp/02.jpg"
+      ]
+    },
+    {
+      "id": "sushispin",
+      "name": "SushiSpin_Style",
+      "base": "krea2",
+      "summary": "建议保持重量低于0.8，因为容易过拟合。",
+      "url": "https://civitai.com/models/2799859/sushispinstyle",
+      "images": [
+        "sushispin/01.jpg"
+      ]
+    },
+    {
+      "id": "houtei9",
+      "name": "画风 河底9 Houtei9 style [krea2]",
+      "base": "krea2",
+      "summary": "这个模型不需要触发词\n推荐出图参数\n分辨率原生2k\nlora权重1\n采样er_side simple 采样次数10\n可以尝试使用二次采样（高清修复），这能让风格更加浓烈、细节更加清晰。但是同时会产生过量的细节处理，导致整张图看起来很乱，所以我建议lanczos1.5倍放大你的图像，降噪0.2，步数 3步 即可。",
+      "url": "https://civitai.com/models/2762845/9-houtei9-style-krea2",
+      "images": [
+        "houtei9/01.jpg",
+        "houtei9/02.jpg",
+        "houtei9/03.jpg"
+      ]
+    }
+  ]
+}

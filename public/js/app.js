@@ -844,6 +844,7 @@ function bind() {
       $("gate").close();
       await loadGallery();
       showBanner();
+      document.dispatchEvent(new Event("site-auth"));
     } catch (error) {
       $("gate-msg").textContent = error.message;
     }
