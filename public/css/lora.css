@@ -52,7 +52,24 @@
   opacity: 1;
   transition: --bloom 0.64s cubic-bezier(0.22, 0.55, 0.2, 1);
 }
-#lora-reader .viewport { inset: 0 0 132px; }
+#lora-reader .viewport {
+  inset: 0 0 118px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+}
+#lora-img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: contain;
+  object-position: center center;
+}
 #lora-reader .sheet-bar h2 {
   margin: 0;
   min-width: 0;

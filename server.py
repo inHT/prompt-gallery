@@ -41,6 +41,7 @@ ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,80}$")
 MEDIA_RE = re.compile(r"^[a-f0-9]{32}\.(png|jpg|webp)$")
 LORA_SAMPLE_RE = re.compile(r"^[A-Za-z0-9_-]{1,80}/[0-9]{2}\.(jpg|png|webp)$")
 MAX_LORA_IMAGES = 8
+MAX_SAMPLE_IMAGES = 24
 MAX_LORA_SUMMARY = 12000
 
 GALLERY_LOCK = threading.Lock()
@@ -430,7 +431,7 @@ def lora_manifest_items() -> list[dict]:
                 "base": str(row.get("base") or "krea2")[:80],
                 "summary": str(row.get("summary") or "")[:MAX_LORA_SUMMARY],
                 "url": str(row.get("url") or "")[:500],
-                "images": images[:MAX_LORA_IMAGES],
+                "images": images[:MAX_SAMPLE_IMAGES],
                 "sample": True,
                 "created": now - index,
             }

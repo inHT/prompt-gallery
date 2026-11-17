@@ -101,7 +101,7 @@ ComfyUI 要顺着采样器的 `positive` / `negative` 连线走，不要在整�
 
 前端插名称、简介、网址时用 `textContent`。图片地址只允许 `/lora-samples/<id>/两位数字.jpg|png|webp` 和 `/lora-media/<32位hex>.png|jpg|webp`。网址只渲染 `http` 和 `https`。
 
-示例图只取当前版本作者自己发的，最多 5 张。作者只发了 2 张就只放 2 张，不使用其他用户贴在模型页上的图。
+示例图取当前版本模型页顶部轮播里的全部图片。轮播有多少张就放多少张，不另去社区图库里翻。弹窗里的大图用 `object-fit: contain`，整张都要落在画面里。
 
 重新下载示例图：
 

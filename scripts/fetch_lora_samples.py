@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import time
 import urllib.error
 import urllib.parse
@@ -146,30 +147,20 @@ def fetch_json(url: str) -> dict:
     raise last_error
 
 
-def creator_images(model_id: int, limit: int = 5) -> list[dict]:
-    """只要这个版本作者自己发的图。作者只发了 2 张就留 2 张，不用其他用户的帖子补。"""
+def carousel_images(model_id: int) -> list[dict]:
+    """取模型页顶部轮播里的全部图片。轮播只有 2 张就留 2 张。"""
     data = fetch_json(API.format(model_id))
-    creator = str((data.get("creator") or {}).get("username") or "").strip()
     versions = data.get("modelVersions") or []
-    if not creator or not versions:
+    if not versions:
         return []
-    version_id = versions[0].get("id")
-    query = urllib.parse.urlencode(
-        {"modelVersionId": version_id, "username": creator, "limit": max(limit, 20)}
-    )
-    payload = fetch_json("https://civitai.com/api/v1/images?" + query)
     found = []
     seen = set()
-    for image in payload.get("items") or []:
+    for image in versions[0].get("images") or []:
         url = image.get("url") or ""
-        if image.get("type") not in (None, "image") or not url or url in seen:
-            continue
-        if image.get("username") != creator or image.get("minor"):
+        if image.get("type") not in (None, "image") or image.get("minor") or not url or url in seen:
             continue
         seen.add(url)
         found.append(image)
-        if len(found) >= limit:
-            break
     return found
 
 
@@ -192,13 +183,13 @@ def sniff(data: bytes) -> str:
 def download(url: str) -> bytes:
     request = urllib.request.Request(sized(url, WIDTH), headers={"User-Agent": "prompt-gallery/1.0"})
     last_error = None
-    for _attempt in range(4):
+    for attempt in range(8):
         try:
             with urllib.request.urlopen(request, timeout=60) as response:
                 return response.read()
-        except (urllib.error.URLError, TimeoutError) as exc:
+        except (urllib.error.URLError, TimeoutError, ConnectionError) as exc:
             last_error = exc
-            time.sleep(1.2)
+            time.sleep(1.5 * (attempt + 1))
     raise last_error
 
 
@@ -216,12 +207,28 @@ def main() -> None:
     out = args.out
     items = []
     for model in MODELS:
-        images = creator_images(model["modelId"])
+        images = carousel_images(model["modelId"])
         folder = out / model["id"]
         folder.mkdir(parents=True, exist_ok=True)
-        for old in folder.glob("*"):
-            if old.is_file():
-                old.unlink()
+        existing = sorted(path for path in folder.glob("[0-9][0-9].jpg") if path.stat().st_size > 1000)
+        if len(existing) == len(images) and images:
+            saved = [f"{model['id']}/{path.name}" for path in existing]
+            print(model["id"], "kept", len(saved), "already")
+            items.append(
+                {
+                    "id": model["id"],
+                    "name": model["name"],
+                    "base": model["base"],
+                    "summary": model["summary"].strip(),
+                    "url": model["url"],
+                    "images": saved,
+                }
+            )
+            continue
+        staging = folder / ".incoming"
+        if staging.exists():
+            shutil.rmtree(staging)
+        staging.mkdir()
         saved = []
         for index, image in enumerate(images, start=1):
             data = download(image["url"])
@@ -229,10 +236,15 @@ def main() -> None:
                 print("skip", model["id"], index, "unknown type")
                 continue
             name = f"{index:02d}.jpg"
-            target = folder / name
+            target = staging / name
             save_jpeg(data, target)
             saved.append(f"{model['id']}/{name}")
             print(model["id"], name, target.stat().st_size)
+        for old in folder.glob("[0-9][0-9].jpg"):
+            old.unlink()
+        for path in sorted(staging.glob("*.jpg")):
+            path.replace(folder / path.name)
+        staging.rmdir()
         print(model["id"], "kept", len(saved))
         items.append(
             {
